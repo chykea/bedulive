@@ -3,7 +3,7 @@ import Open from './components/Open.vue';
 </script>
 
 <template>
-  <Open />
+  <router-view />
 </template>
 
 <style scoped></style>

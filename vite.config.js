@@ -6,7 +6,8 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-// https://vitejs.dev/config/
+import VueRouter from 'unplugin-vue-router/vite'
+
 export default defineConfig({
 
   server: {
@@ -14,6 +15,13 @@ export default defineConfig({
     https: true, // 启用https
   },
   plugins: [
+    // 路由自动配置
+    VueRouter({
+      routesFolder: 'src/pages',
+      exclude: ['**/components/*.vue'],
+      extensions: ['.vue'],
+    }),
+
     vue(),
     basicSSL(), // 本地服务开启https的自签名证书
     // ele 自动导入
@@ -22,6 +30,9 @@ export default defineConfig({
     }),
     Components({
       resolvers: [ElementPlusResolver()]
-    })
+    }),
+
+
+
   ],
 })
