@@ -1,5 +1,5 @@
 <template>
-    <div>user</div>
+    <div>404~</div>
 </template>
 <script setup>
 </script>
