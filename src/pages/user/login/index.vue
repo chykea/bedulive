@@ -85,10 +85,19 @@ const loginFunc = async (formEl) => {
 
             try {
                 const { data } = await login(form_obj)
-                // console.log(data);
-                // 登录成功后，将token存储到localStorage中
-                localStorage.setItem('token', data.result.token)
-                router.replace('/')
+                ElMessage({
+                    message: data.message,
+                    duration: 1000,
+                    type: 'success',
+                    onClose: () => {
+                        const userInfo = { user_name: data.result.user_name, nick_name: data.result.nick_name, identity: data.result.identity }
+                        // 登录成功后，将token存储到localStorage中
+                        localStorage.setItem('token', data.result.token)
+                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                        router.push('/')
+                    }
+                })
+
             } catch (e) {
                 console.log('登录失败');
             }

@@ -51,13 +51,13 @@
                                 <ul>
                                     <router-link to="/user/info">
                                         <li><el-avatar> user </el-avatar></li>
-                                        <li><a href="javascript:(void)">15992556666</a></li>
+                                        <li><a href="javascript:void(0)">{{ nick_name }}</a></li>
                                     </router-link>
                                 </ul>
                             </div>
-                            <!-- <div class="button header-button">
-                                <a href="post-item.html" class="btn">Post an Ad</a>
-                            </div> -->
+                            <div class="button header-button" v-if="identity == '0' || identity == '2'">
+                                <router-link href="post-item.html" class="btn">开始上课</router-link>
+                            </div>
                         </nav>
                     </div>
                 </div>
@@ -67,6 +67,6 @@
 </template>
 <script setup>
 import { getToken } from '../../utils/util'
-console.log(getToken());
+const { user_name, nick_name, identity } = JSON.parse(localStorage.getItem('userInfo'))
 </script>
 <style lang="scss" scoped></style>

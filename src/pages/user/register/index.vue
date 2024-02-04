@@ -47,53 +47,6 @@
                             <p class="outer-link">已有账号？ <router-link to="/user/login"> 返回登录</router-link>
                             </p>
                         </el-form>
-                        <!-- <form action="#!" method="post">
-                            <div class="socila-login">
-                                <ul>
-                                    <li><a href="javascript:void(0)" class="facebook"><i class="lni lni-facebook-original"></i>Import
-                                            From Facebook</a></li>
-                                    <li><a href="javascript:void(0)" class="google"><i class="lni lni-google"></i>Import From Google
-                                            Plus</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="alt-option">
-                                <span>Or</span>
-                            </div>
-                            <div class="form-group">
-                                <label>Name</label>
-                                <input name="password" type="text">
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input name="email" type="email">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input name="password" type="password">
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm Password</label>
-                                <input name="password" type="password">
-                            </div>
-                            <div class="check-and-pass">
-                                <div class="row align-items-center">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input width-auto"
-                                                id="exampleCheck1">
-                                            <label class="form-check-label">Agree to our <a href="javascript:void(0)">Terms and
-                                                    Conditions</a></label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button type="submit" class="btn">Registration</button>
-                            </div>
-                            <p class="outer-link">Already have an account? <a href="login.html"> Login Now</a>
-                            </p>
-                        </form> -->
                     </div>
                 </div>
             </div>
@@ -102,8 +55,10 @@
 </template>
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../../../request/index'
 const { user: { login, register } } = api
+const router = useRouter()
 const identity = ref('1')
 const formDataRef = ref();
 let formData = reactive({
@@ -172,11 +127,20 @@ const registerFunc = (formEle) => {
                 const { user_name, password } = formData
                 const form_obj = { user_name, password, identity: identity.value }
                 const { data } = await register(form_obj)
+                // const token = result.token;
+                // const userInfo = { user_name: result.user_name, nick_name: result.user_name, identity: result.identity }
+                ElMessage({
+                    message: data.message,
+                    duration: 1000,
+                    type: 'success',
+                    onClose: () => {
+                        router.push('/user/login')
+                    }
+                })
             } catch (e) {
                 console.log(e);
             };
         } else {
-            console.log('error submit!')
             return false
         }
     })
