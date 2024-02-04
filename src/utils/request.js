@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ElMessage } from "element-plus";
 
 //不同环境下的地址
 let baseURL = "";
@@ -51,7 +52,11 @@ request.interceptors.response.use(
     error => {
         //可根据不同的状态去区分不同的错误，达到不同效果
         if (error.response.status) {
-            error.response.status === 404 ? alert("请求不存在！！") : alert("其他");
+            const { data } = error.response;
+            ElMessage({
+                message: data.message || 'Error',
+                duration: 1500, type: 'error'
+            })
         }
         return Promise.reject(error);
     }

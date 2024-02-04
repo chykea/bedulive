@@ -1,5 +1,4 @@
 <script setup>
-import Open from './components/Open.vue';
 </script>
 
 <template>

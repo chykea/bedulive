@@ -1,45 +1,54 @@
 <template>
-    <div class="login-body">
-        <div class="login-panel">
-            <div class="login-title">用户登录</div>
-            <el-form :model="formData" :rules="rules" ref="formDataRef">
-                <el-form-item prop="username">
-                    <el-input placeholder="请输入账号" v-model="formData.user_name" size="large" type="text">
-                        <template #prefix>
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input placeholder="请输入密码" v-model="formData.password" size="large" type="password"
-                        @keyup.enter.native="loginFunc">
-                        <template #prefix>
-                            <el-icon>
-                                <Lock />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item style="width: 100%">
-                    <router-link to="/user/register" class="register">注册</router-link>
-                </el-form-item>
-                <!-- <el-form-item label="">
-                    <div class="check-code-panel">
-                        <el-input placeholder="请输入验证码" v-model="formData.checkCode" class="input-panel" />
-                        <img src="checkCodeUrl" class="check-code">
+    <section class="login section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
+                    <div class="form-head">
+                        <h4 class="title">用户登录</h4>
+                        <el-form :model="formData" :rules="rules" ref="formDataRef">
+                            <el-form-item prop="username" class="form-group">
+                                <el-input placeholder="请输入账号" v-model="formData.user_name" size="large" type="text">
+                                    <template #prefix>
+                                        <el-icon>
+                                            <User />
+                                        </el-icon>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item prop="password" class="form-group">
+                                <el-input placeholder="请输入密码" v-model="formData.password" size="large" type="password"
+                                    @keyup.enter.native="loginFunc">
+                                    <template #prefix>
+                                        <el-icon>
+                                            <Lock />
+                                        </el-icon>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <div class="check-and-pass">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <!-- <div class="form-check">
+                                            <input type="checkbox" class="form-check-input width-auto" id="exampleCheck1">
+                                            <label class="form-check-label">Remember me</label>
+                                        </div> -->
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <a href="javascript:void(0)" class="lost-pass">忘记密码?</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <el-form-item class="button">
+                                <el-button class="btn" type="primary" @click="loginFunc(formDataRef)"
+                                    size="large">登录</el-button>
+                            </el-form-item>
+                            <p class="outer-link">没有账号? <router-link to="/user/register">点击注册</router-link></p>
+                        </el-form>
                     </div>
-                </el-form-item> -->
-                <!-- <el-form-item label="">
-                    <el-checkbox label="记住密码" name="type" />
-                </el-form-item> -->
-                <el-form-item label="">
-                    <el-button type="primary" style="width: 100%;" @click="loginFunc" size="large">登录</el-button>
-                </el-form-item>
-            </el-form>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </template>
 <script setup>
 import { ref, reactive } from 'vue'
@@ -48,6 +57,7 @@ import api from '../../../request/index'		//这里使用自行封装的axios，�
 import { useRouter } from 'vue-router';
 
 const { user: { login, register } } = api
+const router = useRouter();
 // const checkCodeUrl = "api/checkCode?" + new Date().getTime();
 //表单
 const formDataRef = ref();
@@ -64,24 +74,30 @@ const rules = {
         required: true,
         message: "请输入密码"
     }],
-    // checkCode: [{
-    //     required: true,
-    //     message: "请输入验证码"
-    // }],
 }
 
 
-const loginFunc = async () => {
-    var form_obj = JSON.parse(JSON.stringify(formData));
-    // console.log(form_obj);
+const loginFunc = async (formEl) => {
+    if (!formEl) return
+    formEl.validate(async (valid) => {
+        if (valid) {
+            var form_obj = JSON.parse(JSON.stringify(formData));
 
-    try {
-        const { data } = await login(form_obj)
-        console.log(data)
-    } catch (e) {
-        ElMessage.error('账号或密码错误！！！登录失败！！！')
+            try {
+                const { data } = await login(form_obj)
+                // console.log(data);
+                // 登录成功后，将token存储到localStorage中
+                localStorage.setItem('token', data.result.token)
+                router.replace('/')
+            } catch (e) {
+                console.log('登录失败');
+            }
 
-    }
+        } else {
+            return false
+        }
+    })
+
 
     // if (data) {
     //     ElMessage({
@@ -100,38 +116,4 @@ const loginFunc = async () => {
 
 } 
 </script>
-<style lang='scss' scoped>
-.login-body {
-    // background: url("../assets/三门峡.png") no-repeat center center;
-    height: 100%;
-    width: 100%;
-    background-size: cover;
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    .login-panel {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-
-        padding: 25px;
-        width: 26%;
-        min-width: 460px;
-        height: 30%;
-        min-height: 300px;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 5%;
-        box-shadow: 2px 2px 10px #ddd;
-
-        .login-title {
-            font-size: 22px;
-            text-align: center;
-            margin-bottom: 22px;
-        }
-    }
-}
-</style>
+<style lang='scss' scoped></style>

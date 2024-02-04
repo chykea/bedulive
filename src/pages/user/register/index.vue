@@ -1,108 +1,189 @@
 <template>
-    <div class="register-body">
-        <div class="register-panel">
-            <div class="register-title">用户登录</div>
-            <el-radio-group v-model="identity" label="identity">
-                <el-radio-button label="student">学生</el-radio-button>
-                <el-radio-button label="teacher">教师</el-radio-button>
-                <el-radio-button label="admin">管理</el-radio-button>
-            </el-radio-group>
-            <el-form :model="formData" :rules="rules" ref="formDataRef">
-                <el-form-item prop="user_name">
-                    <el-input placeholder="请输入账号" v-model="formData.user_name" size="large" type="text">
-                        <template #prefix>
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input placeholder="请输入密码" v-model="formData.password" size="large" type="password"
-                        @keyup.enter.native="registerFunc">
-                        <template #prefix>
-                            <el-icon>
-                                <Lock />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item style="width: 100%">
-                    <router-link to="/user/login" class="register">已有账号？返回登录</router-link>
-                </el-form-item>
-                <!-- <el-form-item label="">
-                    <div class="check-code-panel">
-                        <el-input placeholder="请输入验证码" v-model="formData.checkCode" class="input-panel" />
-                        <img src="checkCodeUrl" class="check-code">
+    <section class="login registration section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
+                    <div class="form-head">
+                        <h4 class="title">Registration</h4>
+                        <!-- <el-radio-group class="identity-panel" v-model="identity" label="identity">
+                            <el-radio-button label="1">学生</el-radio-button>
+                            <el-radio-button label="2">教师</el-radio-button>
+                            <el-radio-button label="0">管理</el-radio-button>
+                        </el-radio-group> -->
+                        <el-form :model="formData" :rules="rules" ref="formDataRef">
+                            <el-form-item prop="user_name" class="form-group">
+                                <el-input placeholder="请输入手机号" v-model="formData.user_name" size="large" type="text">
+                                    <template #prefix>
+                                        <el-icon>
+                                            <User />
+                                        </el-icon>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item prop="password" class="form-group">
+                                <el-input placeholder="请输入密码" v-model="formData.password" size="large" type="password"
+                                    @keyup.enter.native="registerFunc">
+                                    <template #prefix>
+                                        <el-icon>
+                                            <Lock />
+                                        </el-icon>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item prop="confirm_password" class="form-group">
+                                <el-input placeholder="请确认密码" v-model="formData.confirm_password" size="large"
+                                    type="password" @keyup.enter.native="registerFunc">
+                                    <template #prefix>
+                                        <el-icon>
+                                            <Lock />
+                                        </el-icon>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="" class="button">
+                                <el-button type="primary" class="btn" @click="registerFunc(formDataRef)"
+                                    size="large">注册</el-button>
+                            </el-form-item>
+                            <p class="outer-link">已有账号？ <router-link to="/user/login"> 返回登录</router-link>
+                            </p>
+                        </el-form>
+                        <!-- <form action="#!" method="post">
+                            <div class="socila-login">
+                                <ul>
+                                    <li><a href="javascript:void(0)" class="facebook"><i class="lni lni-facebook-original"></i>Import
+                                            From Facebook</a></li>
+                                    <li><a href="javascript:void(0)" class="google"><i class="lni lni-google"></i>Import From Google
+                                            Plus</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="alt-option">
+                                <span>Or</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input name="password" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input name="email" type="email">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input name="password" type="password">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <input name="password" type="password">
+                            </div>
+                            <div class="check-and-pass">
+                                <div class="row align-items-center">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input width-auto"
+                                                id="exampleCheck1">
+                                            <label class="form-check-label">Agree to our <a href="javascript:void(0)">Terms and
+                                                    Conditions</a></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button">
+                                <button type="submit" class="btn">Registration</button>
+                            </div>
+                            <p class="outer-link">Already have an account? <a href="login.html"> Login Now</a>
+                            </p>
+                        </form> -->
                     </div>
-                </el-form-item> -->
-                <!-- <el-form-item label="">
-                    <el-checkbox label="记住密码" name="type" />
-                </el-form-item> -->
-                <el-form-item label="">
-                    <el-button type="primary" style="width: 100%;" @click="registerFunc" size="large">注册</el-button>
-                </el-form-item>
-            </el-form>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </template>
 <script setup>
 import { ref, reactive } from 'vue'
-const identity = ref('student')
+import api from '../../../request/index'
+const { user: { login, register } } = api
+const identity = ref('1')
 const formDataRef = ref();
 let formData = reactive({
     user_name: "",
-    password: ""
+    password: "",
+    confirm_password: "",
 });
+
+const validatePass = (rule, value, callback) => {
+    if (value === '') {
+        callback(new Error('请输入密码'))
+    } else {
+        if (formData.confirm_password !== '') {
+            if (!formDataRef.value) return
+            formDataRef.value.validateField('confirm_password', () => null)
+        }
+        callback()
+    }
+}
+const validateConfPass = (rule, value, callback) => {
+    if (value === '') {
+        callback(new Error('请再次输入密码'))
+    } else if (value !== formData.password) {
+        callback(new Error("密码不一致"))
+    } else {
+        callback()
+    }
+}
+const reg = /^1[3456789]\d{9}$/;
+const validateUserName = (rule, value, callback) => {
+    if (value === '') {
+        callback(new Error('请输入手机号'))
+    } else if (!reg.test(value)) {
+        callback(new Error('请输入正确的手机号'))
+    } else {
+        callback()
+    }
+
+}
 const rules = {
     user_name: [{
         required: true,
-        message: "请输入用户名"
+        validator: validateUserName,
+        trigger: 'blur'
     }],
     password: [{
         required: true,
-        message: "请输入密码"
+        validator: validatePass,
+        trigger: 'blur'
     }],
-    // checkCode: [{
-    //     required: true,
-    //     message: "请输入验证码"
-    // }],
-}
-const registerFunc = () => {
+    confirm_password: [{
+        required: true,
+        validator: validateConfPass,
+        trigger: 'blur'
+    }],
 
+}
+
+
+const registerFunc = (formEle) => {
+
+    if (!formEle) return
+    formEle.validate(async (valid) => {
+        if (valid) {
+            try {
+                const { user_name, password } = formData
+                const form_obj = { user_name, password, identity: identity.value }
+                const { data } = await register(form_obj)
+            } catch (e) {
+                console.log(e);
+            };
+        } else {
+            console.log('error submit!')
+            return false
+        }
+    })
 }
 </script>
 <style lang='scss' scoped>
-.register-body {
-    height: 100%;
-    width: 100%;
-    background-size: cover;
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    .register-panel {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-
-        padding: 25px;
-        width: 26%;
-        min-width: 460px;
-        height: 30%;
-        min-height: 300px;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 5%;
-        box-shadow: 2px 2px 10px #ddd;
-
-        .register-title {
-            font-size: 22px;
-            text-align: center;
-            margin-bottom: 22px;
-        }
-    }
+.identity-panel {
+    margin-bottom: 22px;
 }
 </style>

@@ -1,8 +1,7 @@
 <template>
-    <div>
-        <h1>首页</h1>
-    </div>
+    <Header />
 </template>
 <script setup>
+import Header from '../components/header/index.vue'
 </script>
 <style lang="scss" scoped></style>
