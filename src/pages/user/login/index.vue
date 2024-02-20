@@ -103,8 +103,8 @@ const loginFunc = async (formEl) => {
                     onClose: () => {
                         const userInfo = { user_name: result.user_name, nick_name: result.nick_name, identity: result.identity }
                         // 登录成功后，将token存储到localStorage中
-                        localStorage.setItem('token', data.result.token)
-                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                        sessionStorage.setItem('token', data.result.token)
+                        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                         router.push('/')
                     }
                 })

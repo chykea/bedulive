@@ -1,10 +1,10 @@
 
 const getToken = () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     return token ? token : null;
 }
 const getInfo = () => {
-    const userInfo = localStorage.getItem('userInfo');
+    const userInfo = sessionStorage.getItem('userInfo');
     return userInfo ? JSON.parse(userInfo) : null;
 }
 export {

@@ -7,7 +7,8 @@
                 <div class="col-lg-8  col-12">
                     <div class="single-inner">
                         <div class="post-thumbnils">
-                            <video width="840" id="screen" autoplay muted />
+                            <video width="840" id="screen" controls autoplay muted />
+                            <!-- <audio id="sounds" controls /> -->
                         </div>
                         <div class="control" v-if="identityRef !== '1'">
                             <!-- <button @click="openScreen">开启桌面</button> -->
@@ -18,7 +19,7 @@
                     </div>
                 </div>
                 <aside class="col-lg-4  col-12">
-                    <video width="320" id="camera" autoplay muted />
+                    <!-- <video width="320" id="camera" autoplay muted /> -->
                     <div class="messages-body">
                         <div>
                             <div class="chat-list">
@@ -74,8 +75,9 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPushURL, getPlayerURL } from '../../request'
+import { getInfo } from '../../utils/util'
 const route = useRoute();
-const identity = JSON.parse(localStorage.getItem('userInfo'))?.identity || '1'
+const identity = getInfo()?.identity || '1'
 
 const identityRef = ref(identity)
 
@@ -88,12 +90,12 @@ onMounted(async () => {
         }
         sdk = new SrsRtcPlayerAsync();
         let roomId = route.query.roomId
-        // console.log(roomId);
         const { data: { result } } = await getPlayerURL(roomId)
         // webrtc://192.168.106.130/bedulive/8adfc900-c64c-11ee-a36b-9f7cab65ec99
         sdk.play(result.stream_url)
         document.getElementById('screen').srcObject = sdk.screen
-        document.getElementById('camera').srcObject = sdk.camera
+        // document.getElementById('sounds').srcObject = sdk.audio
+
     }
 })
 
@@ -104,13 +106,13 @@ let startLive = async () => {
     }
 
     sdk = new SrsRtcPublishAsync();
-    await openCemare()
-    await openScreen()
     const { data: { result } } = await getPushURL()
 
     try {
         let session = await sdk.publish(result.stream_url)
-        // console.log('远端offer', session.sdp);
+        document.getElementById('screen').srcObject = sdk.screen
+        // document.getElementById('sounds').srcObject = sdk.audio
+
     } catch (e) {
         console.log(e);
         sdk.close()
@@ -118,20 +120,6 @@ let startLive = async () => {
     }
 }
 
-// 现在只能先实现全部开启或关闭
-const openScreen = async () => {
-    if (document.getElementById('screen').srcObject) return;
-    document.getElementById('screen').srcObject = sdk.screen
-    // await sdk.openScreen()
-}
-const openCemare = async () => {
-    if (document.getElementById('camera').srcObject) return;
-    document.getElementById('camera').srcObject = sdk.camera
-    // await sdk.openCemare()
-}
-// const openSounds = () => {
-//     sdk.openSounds()
-// }
 </script>
 <style lang='scss' scoped>
 .single-inner {

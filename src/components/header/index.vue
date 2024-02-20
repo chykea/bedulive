@@ -67,10 +67,11 @@
 </template>
 <script setup>
 import { ref } from 'vue';
-import { getToken } from '../../utils/util'
+import { getToken, getInfo } from '../../utils/util'
 const userInfo = ref({})
 try {
-    const { user_name, nick_name, identity } = JSON.parse(localStorage.getItem('userInfo'))
+
+    const { user_name, nick_name, identity } = getInfo()
     userInfo.value = { user_name, nick_name, identity }
 } catch (e) {
 

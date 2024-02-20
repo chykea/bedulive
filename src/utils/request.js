@@ -84,8 +84,8 @@ request.interceptors.response.use(
             // 如果报错或过期
             if (data.code === '10101' || data.code === '10102') {
 
-                localStorage.removeItem('token')
-                localStorage.removeItem('userInfo')
+                sessionStorage.removeItem('token')
+                sessionStorage.removeItem('userInfo')
                 router.push('/user/login');
             }
             ElMessage({
