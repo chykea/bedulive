@@ -5,6 +5,7 @@ const router = createRouter({
     extendRoutes: (routes) => {
         // 在自动生成的routes数组,对符合条件的路由进行加工
         const route = routes.map(r => {
+            // 重定向
             return r.path === '/user' ? { ...r, redirect: '/user/login' } : r;
         })
         // console.log(route);
@@ -22,6 +23,12 @@ router.beforeEach((to, from, next) => {
         next(from.path)
         return
     }
+    // // 如果没有token,则跳转登录
+    // if (!getToken() && (to.path !== '/user/login' || to.path !== '/user/register')) {
+    //     ElMessage({ message: '请先登录', type: 'warning' })
+    //     next('/user/login')
+    //     return
+    // }
 
     next();
 })

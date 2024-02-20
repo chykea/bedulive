@@ -1,7 +1,15 @@
 import axios from "axios";
 import { ElMessage } from "element-plus";
+// useRouter只能在setup中使用
+// import { useRouter } from "vue-router";
+// 如果在setup之外使用的话,直接引入router的文件即可
+import router from '../router/index'
+import { getToken } from "./util";
+
+
 
 //不同环境下的地址
+const tokenPrefix = import.meta.env.VITE_TOKEN_PREFIX
 let baseURL = "";
 
 //node中的环境变量process.env,也就是我们新增开发、生产的配置文件
@@ -23,6 +31,8 @@ const request = axios.create({
 //这里是设置发送json格式参数
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
+const source = axios.CancelToken.source();
+
 //请求拦截器
 request.interceptors.request.use(
     //发送之前想要做些什么
@@ -33,7 +43,25 @@ request.interceptors.request.use(
         //        基础地址,请求参数,头部, 请求方式, 超时,  请求地址  等
 
         // config.headers.Cookie = "110110110110110110";
-        return config;
+        // 如果有token就携带(证明已经登录了),没有就不携带(登录或注册)
+        const token = getToken() || ''
+        if (token) {
+            config.headers.Authorization = tokenPrefix + " " + token
+            return config;
+        } else {
+
+            const path = router.currentRoute._value.path
+
+            if ((path !== '/user/login' && path !== '/user/register' && path !== '/')) {
+                router.push('/user/login')
+                ElMessage({ message: '未登录', type: 'warning' })
+                source.cancel('未登录，请求取消')
+                throw new axios.Cancel('未登录，请求取消')
+                // return
+            }
+            return config
+        }
+
     },
     //方法返回一个带有拒绝原因的 Promise 对象。
     error => Promise.reject(error)
@@ -51,12 +79,20 @@ request.interceptors.response.use(
     //请求失败
     error => {
         //可根据不同的状态去区分不同的错误，达到不同效果
-        if (error.response.status) {
+        if (error.response && error.response.status) {
             const { data } = error.response;
+            // 如果报错或过期
+            if (data.code === '10101' || data.code === '10102') {
+
+                localStorage.removeItem('token')
+                localStorage.removeItem('userInfo')
+                router.push('/user/login');
+            }
             ElMessage({
                 message: data.message || 'Error',
                 duration: 1500, type: 'error'
             })
+
         }
         return Promise.reject(error);
     }

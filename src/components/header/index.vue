@@ -31,7 +31,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
-                                            to="/live">直播</router-link>
+                                            to="/liveList">直播</router-link>
 
                                     </li>
                                 </ul>
@@ -51,12 +51,12 @@
                                 <ul>
                                     <router-link to="/user/info">
                                         <li><el-avatar> user </el-avatar></li>
-                                        <li><a href="javascript:void(0)">{{ nick_name }}</a></li>
+                                        <li><a href="javascript:void(0)">{{ userInfo.nick_name }}</a></li>
                                     </router-link>
                                 </ul>
                             </div>
-                            <div class="button header-button" v-if="identity == '0' || identity == '2'">
-                                <router-link href="post-item.html" class="btn">开始上课</router-link>
+                            <div class="button header-button" v-if="userInfo.identity == '0' || userInfo.identity == '2'">
+                                <router-link to="/live" class="btn">开始上课</router-link>
                             </div>
                         </nav>
                     </div>
@@ -66,7 +66,15 @@
     </header>
 </template>
 <script setup>
+import { ref } from 'vue';
 import { getToken } from '../../utils/util'
-const { user_name, nick_name, identity } = JSON.parse(localStorage.getItem('userInfo'))
+const userInfo = ref({})
+try {
+    const { user_name, nick_name, identity } = JSON.parse(localStorage.getItem('userInfo'))
+    userInfo.value = { user_name, nick_name, identity }
+} catch (e) {
+
+}
+
 </script>
 <style lang="scss" scoped></style>

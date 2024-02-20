@@ -1,7 +1,6 @@
 <template>
-    <div class="user-container">
-        <router-view></router-view>
-    </div>
+    <Header />
+    <router-view></router-view>
 </template>
 
 <script setup>

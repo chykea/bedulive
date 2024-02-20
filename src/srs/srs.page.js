@@ -83,6 +83,7 @@ function build_default_flv_url() {
     return uri;
 }
 
+// 构建rtc推流地址
 function build_default_rtc_url(query) {
     // The format for query string to overwrite configs of server.
     console.log('?eip=x.x.x.x to overwrite candidate. 覆盖服务器candidate(外网IP)配置');

@@ -1,15 +1,16 @@
 <template>
+    <Breadcrumb />
     <section class="login registration section">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
                     <div class="form-head">
                         <h4 class="title">Registration</h4>
-                        <!-- <el-radio-group class="identity-panel" v-model="identity" label="identity">
+                        <el-radio-group class="identity-panel" v-model="identity" label="identity">
                             <el-radio-button label="1">学生</el-radio-button>
                             <el-radio-button label="2">教师</el-radio-button>
                             <el-radio-button label="0">管理</el-radio-button>
-                        </el-radio-group> -->
+                        </el-radio-group>
                         <el-form :model="formData" :rules="rules" ref="formDataRef">
                             <el-form-item prop="user_name" class="form-group">
                                 <el-input placeholder="请输入手机号" v-model="formData.user_name" size="large" type="text">
@@ -53,11 +54,19 @@
         </div>
     </section>
 </template>
+<route>
+    {
+        name:'register',
+        meta: {
+            title: '注册'
+        }
+    }
+</route>
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../request/index'
-const { user: { login, register } } = api
+import { register } from '../../../request/index'
+// const { user: { login, register } } = api
 const router = useRouter()
 const identity = ref('1')
 const formDataRef = ref();

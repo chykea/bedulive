@@ -5686,12 +5686,15 @@ blockquote .shape {
 }
 
 .messages-body .chat-list {
+  background-color: #fff;
+  padding-left: 30px;
   padding-right: 30px;
   padding-top: 30px;
+  margin-top: 30px;
 }
 
 .messages-body .chat-list .single-chat-head {
-  height: 309px;
+  height: 500px;
   overflow-y: auto;
 }
 
@@ -5747,7 +5750,7 @@ blockquote .shape {
 
 .messages-body .chat-list .single-chat-head li.right {
   padding: 0;
-  padding-right: 75px;
+  padding-right: 70px;
 }
 
 .messages-body .chat-list .single-chat-head li.right img {

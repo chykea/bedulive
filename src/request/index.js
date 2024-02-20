@@ -1,5 +1,7 @@
-import user from "./user";
+import { login, register, getUserInfo } from "./user";
+import { getPushURL, getLiveList, getPlayerURL } from "./live";
 
-export default {
-    user, // 登录注册
+export {
+    login, register, getUserInfo, // 登录注册
+    getPushURL, getLiveList, getPlayerURL // 直播
 }

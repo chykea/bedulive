@@ -1,5 +1,3 @@
-
-// 现在在srs的测试是成功了的
 'use strict';
 
 function SrsError(name, message) {
@@ -10,73 +8,107 @@ function SrsError(name, message) {
 SrsError.prototype = Object.create(Error.prototype);
 SrsError.prototype.constructor = SrsError;
 
-// 推流测试完成
-function SrsRtcPublisherAsync() {
+
+// 推流
+function SrsRtcPublishAsync() {
+
     var self = {};
-    self.constraints = {
-        audio: true,
-        // video: {
-        //     width: { ideal: 320, max: 576 }
-        // }
+    // self.streamUrl = url
+    var screenConstraint = {
         video: true
-    };
-    self.displayConstraint = {
-        video: true
+
     }
+    var cemareConstraint = {
+        video: true,
+        audio: true
+    }
+    /*  var soundsConstraint = {
+         video: false,
+         audio: true
+     } */
+    self.pc = new RTCPeerConnection(null);
 
-    // url为webrtc://xx 格式的推流地址
-    self.publish = async function (url) {
-        var conf = self.__internal.prepareUrl(url);
-
-        // 只推
-        self.pc.addTransceiver("audio", { direction: "sendonly" });
-        self.pc.addTransceiver("video", { direction: "sendonly", codec: 'VP8', clockRate: 90000, width: 640, height: 480, frameRate: 30 });
-        self.pc.addTransceiver("video", { direction: "sendonly", codec: 'VP8', clockRate: 90000, width: 1280, height: 720, frameRate: 30 });
+    self.camera = new MediaStream();
+    self.screen = new MediaStream();
 
 
+    self.close = function () {
+        self.pc && self.pc.close();
+        self.pc = null;
+    };
 
 
-        if (!navigator.mediaDevices && window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
-            throw new SrsError('HttpsRequiredError', `Please use HTTPS or localhost to publish, read https://github.com/ossrs/srs/issues/2762#issuecomment-983147576`);
-        }
 
-        // 在这里获取音频流与视频流
-        var stream = await navigator.mediaDevices.getUserMedia(self.constraints);
-        // 获取屏幕
-        var desktopStream = await navigator.mediaDevices.getDisplayMedia(self.displayConstraint)
-
+    self.openCemare = async function () {
+        if (self.camera.getTracks().length) return
         // 摄像头
+        var stream = await navigator.mediaDevices.getUserMedia(cemareConstraint);
+
         stream.getTracks().forEach(function (track) {
             // 然后添加到RTCPeerConnection中(传输)
-            self.pc.addTrack(track);
+            // self.pc.addTrack(track);
             // 把每个轨道放到self.stream中(本地显示)
-            self.ontrack && self.ontrack({ track: track });
+            self.camera.addTrack(track);
+            self.pc.addTrack(track, self.camera)
+        });
+    }
+    self.openScreen = async function () {
+        if (self.screen.getTracks().length) return
+
+        // 获取屏幕
+        var screenStream = await navigator.mediaDevices.getDisplayMedia(screenConstraint)
+        screenStream.getTracks().forEach(function (track) {
+            // self.pc.addTrack(track);
+            self.screen.addTrack(track)
+            self.pc.addTrack(track, self.screen)
         });
 
-        desktopStream.getTracks().forEach(function (track) {
-            self.pc.addTrack(track);
-            self.display.addTrack(track)
+    }
+    // 用于开启声音
+    /* self.openSounds = async function () {
+        var soundsStream = await navigator.mediaDevices.getUserMedia(soundsConstraint);
+        // 在页面中播放声音
+        const audioContext = new AudioContext();
+        const sourceNode = audioContext.createMediaStreamSource(soundsStream);
+        sourceNode.connect(audioContext.destination)
 
-        });
+        soundsStream.getTracks().forEach(function (track) {
+            self.pc.addTrack(track)
+        })
+    } */
+
+    self.publish = async function (url) {
+        self.session = await self.generateOffer(url)
+        return self.session
+    }
+    self.generateOffer = async function (url) {
+
+        var conf = self.__internal.prepareUrl(url);
+
+        self.pc.addTransceiver("audio", { direction: "recvonly" });
+        self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.camera] });
+        self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.screen] });
+
+
+        await self.openCemare()
+        await self.openScreen()
 
 
         var offer = await self.pc.createOffer();
-        await self.pc.setLocalDescription(offer);
-        // console.log('本地offer', offer.sdp);
 
+        await self.pc.setLocalDescription(offer);
 
         var session = await new Promise(function (resolve, reject) {
             var data = {
                 api: conf.apiUrl, tid: conf.tid, streamurl: conf.streamUrl,
                 clientip: null, sdp: offer.sdp
             };
-            console.log("Generated offer: ", data);
 
             $.ajax({
                 type: "POST", url: conf.apiUrl, data: JSON.stringify(data),
                 contentType: 'application/json', dataType: 'json'
             }).done(function (data) {
-                console.log("Got answer: ", data);
+
                 if (data.code) {
                     reject(data);
                     return;
@@ -87,35 +119,18 @@ function SrsRtcPublisherAsync() {
                 reject(reason);
             });
         });
-        // console.log('远端answer', session.sdp);
+
+        // console.log('远端offer', session.sdp);
         await self.pc.setRemoteDescription(
             new RTCSessionDescription({ type: 'answer', sdp: session.sdp })
         );
 
-
-        session.simulator = conf.schema + '//' + conf.urlObject.server + ':' + conf.port + '/rtc/v1/nack/';
-
         return session;
-    };
-
-
-    // Close the publisher.
-    self.close = function () {
-        self.pc && self.pc.close();
-        self.pc = null;
-    };
-
-
-    self.ontrack = function (event) {
-        // Add track to stream of SDK.
-        self.stream.addTrack(event.track);
-    };
-
-
-    // Internal APIs.
+    }
     self.__internal = {
         defaultPath: '/rtc/v1/publish/',
         prepareUrl: function (webrtcUrl) {
+            //
             var urlObject = self.__internal.parse(webrtcUrl);
 
             // If user specifies the schema, use it as API schema.
@@ -150,6 +165,8 @@ function SrsRtcPublisherAsync() {
             };
         },
         parse: function (url) {
+            // 根据推流地址进行解析
+            // 据观察，这个创建出来的a标签只是用于进行推流地址的解析
             // @see: http://stackoverflow.com/questions/10469575/how-to-use-location-object-to-parse-url-without-redirecting-the-page-in-javascri
             var a = document.createElement("a");
             a.href = url.replace("rtmp://", "http://")
@@ -197,7 +214,7 @@ function SrsRtcPublisherAsync() {
             if (!port) {
                 // Finger out by webrtc url, if contains http or https port, to overwrite default 1985.
                 // 判断是否为webrtc推流
-                console.log(url.indexOf(`webrtc://${a.host}:`));
+                // console.log(url.indexOf(`webrtc://${a.host}:`));
                 if (schema === 'webrtc' && url.indexOf(`webrtc://${a.host}:`) === 0) {
                     port = (url.indexOf(`webrtc://${a.host}:80`) === 0) ? 80 : 443;
                 }
@@ -265,16 +282,10 @@ function SrsRtcPublisherAsync() {
         }
     };
 
-    // unified-plan规范可以保证sdp同时存在多个视频轨道,但一次只能发一个视频流
-    self.pc = new RTCPeerConnection(null);
-
-    self.stream = new MediaStream();
-    self.display = new MediaStream();
     return self;
 }
 
-// Depends on adapter-7.4.0.min.js from https://github.com/webrtc/adapter
-// Async-await-promise based SRS RTC Player.
+
 function SrsRtcPlayerAsync() {
     var self = {};
 
@@ -283,17 +294,18 @@ function SrsRtcPlayerAsync() {
         var conf = self.__internal.prepareUrl(url);
 
         self.pc.addTransceiver("audio", { direction: "recvonly" });
-        self.pc.addTransceiver("video", { direction: "recvonly", codec: 'VP8', clockRate: 90000, width: 640, height: 480, frameRate: 30 });
-        self.pc.addTransceiver("video", { direction: "recvonly", codec: 'VP8', clockRate: 90000, width: 1280, height: 720, frameRate: 30 });
+        self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.camera] });
+        self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.screen] });
 
 
         var offer = await self.pc.createOffer();
-        // console.log('本地offer', offer.sdp);
+        // console.log('本地sdp', offer.sdp);
         // 本地生成的sdp与answer的m=行修改一致
         offer.sdp = offer.sdp.replace(/a=group:BUNDLE 0 1 2/g, 'a=group:BUNDLE 0 1 video-1')
         offer.sdp = offer.sdp.replace(/a=mid:2/g, 'a=mid:video-1')
 
         await self.pc.setLocalDescription(offer);
+        // console.log('本地offer', offer.sdp);
 
         var session = await new Promise(function (resolve, reject) {
             // @see https://github.com/rtcdn/rtcdn-draft
@@ -306,7 +318,7 @@ function SrsRtcPlayerAsync() {
                 type: "POST", url: conf.apiUrl, data: JSON.stringify(data),
                 contentType: 'application/json', dataType: 'json'
             }).done(function (data) {
-                console.log("Got answer: ", data);
+                // console.log("Got answer: ", data);
                 if (data.code) {
                     reject(data); return;
                 }
@@ -316,7 +328,7 @@ function SrsRtcPlayerAsync() {
                 reject(reason);
             });
         });
-        console.log('远方answer', session.sdp);
+        // console.log('远方sdp', session.sdp);
         await self.pc.setRemoteDescription(
             new RTCSessionDescription({ type: 'answer', sdp: session.sdp })
         );
@@ -331,13 +343,20 @@ function SrsRtcPlayerAsync() {
         self.pc = null;
     };
 
+    // 接收到远端的音视频轨道时
     // The callback when got remote track.
-    // Note that the onaddstream is deprecated, @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     self.ontrack = function (event) {
-        if (event.transceiver.mid == '1' || event.transceiver.mid == '0')
-            self.stream.addTrack(event.track);
-        else if (event.transceiver.mid == 'video-1')
-            self.display.addTrack(event.track)
+        // console.log(event.track);
+        if (event.transceiver.mid == '1' || event.transceiver.mid == '0') {
+            // console.log(event.track);
+            self.camera.addTrack(event.track);
+        }
+
+        else if (event.transceiver.mid == 'video-1') {
+            // console.log(event.track);
+            self.screen.addTrack(event.track)
+        }
+
     };
 
     // Internal APIs.
@@ -490,13 +509,13 @@ function SrsRtcPlayerAsync() {
     self.pc = new RTCPeerConnection(null);
 
 
-    self.stream = new MediaStream();
-    self.display = new MediaStream();
+    self.camera = new MediaStream();
+    self.screen = new MediaStream();
 
-
+    // 接收到远端轨道时会自动执行
     self.pc.ontrack = function (event) {
         console.log(event);
-
+        // console.log(self.pc);
         if (self.ontrack) {
             self.ontrack(event);
         }
@@ -504,33 +523,3 @@ function SrsRtcPlayerAsync() {
 
     return self;
 }
-
-
-function SrsRtcFormatSenders(senders, kind) {
-    var codecs = [];
-    senders.forEach(function (sender) {
-        var params = sender.getParameters();
-        params && params.codecs && params.codecs.forEach(function (c) {
-            if (kind && sender.track.kind !== kind) {
-                return;
-            }
-
-            if (c.mimeType.indexOf('/red') > 0 || c.mimeType.indexOf('/rtx') > 0 || c.mimeType.indexOf('/fec') > 0) {
-                return;
-            }
-
-            var s = '';
-
-            s += c.mimeType.replace('audio/', '').replace('video/', '');
-            s += ', ' + c.clockRate + 'HZ';
-            if (sender.track.kind === "audio") {
-                s += ', channels: ' + c.channels;
-            }
-            s += ', pt: ' + c.payloadType;
-
-            codecs.push(s);
-        });
-    });
-    return codecs.join(", ");
-}
-

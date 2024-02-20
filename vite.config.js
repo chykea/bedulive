@@ -27,6 +27,8 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         routesFolder: 'src/pages',
         exclude: ['**/components/*.vue'],
         extensions: ['.vue'],
+        // 自定义 <route> 模块
+        routeBlockLang: 'json5',
 
       }),
 
