@@ -94,16 +94,16 @@ const loginFunc = async (formEl) => {
 
             try {
                 const { data } = await login(form_obj)
-                const { result } = data
+                const { token, ...result } = data.result
 
                 ElMessage({
                     message: data.message,
                     duration: 1000,
                     type: 'success',
                     onClose: () => {
-                        const userInfo = { user_name: result.user_name, nick_name: result.nick_name, identity: result.identity }
+                        const userInfo = result
                         // 登录成功后，将token存储到localStorage中
-                        sessionStorage.setItem('token', data.result.token)
+                        sessionStorage.setItem('token', token)
                         sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                         router.push('/')
                     }
