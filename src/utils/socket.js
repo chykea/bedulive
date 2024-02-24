@@ -17,14 +17,21 @@ class createSocket {
         this.socket.emit('leave', roomId)
     }
     // 这里会获取输入框的字符串
-    sendMsg({ type, roomId, msg, user }) {
+    sendMsg({ roomId, msg, user }) {
         if (!msg) return
         return new Promise((resolve, reject) => {
-            this.socket.emit('sendMsg', { type, roomId, user, msg }, (data) => {
+            this.socket.emit('sendMsg', { type: 'chat', roomId, user, msg }, (data) => {
                 resolve(data)
             })
         })
-
+    }
+    sendCode({ roomId, code, user, isShare }) {
+        // if (!code) return
+        return new Promise((resolve, reject) => {
+            this.socket.emit('sendMsg', { type: 'code', roomId, user, code, isShare }, (data) => {
+                resolve(data)
+            })
+        })
     }
 
 }

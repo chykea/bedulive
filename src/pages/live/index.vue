@@ -9,13 +9,13 @@
                         <div class="post-thumbnils">
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
-                        <div class="control" v-if="identityRef !== '1'">
-                            <button @click="startLive">开始直播</button>
+                        <div class="control">
+                            <el-button v-if="identityRef !== '1'" plain @click="startLive">开始直播</el-button>
+                            <el-button plain @click="showEditor = true">代码编辑器</el-button>
                         </div>
                     </div>
                 </div>
                 <aside class="col-lg-4  col-12">
-                    <!-- <video width="320" id="camera" autoplay muted /> -->
                     <div class="messages-body">
                         <div>
                             <div class="chat-list">
@@ -37,24 +37,76 @@
             </div>
         </div>
     </section>
+    <el-dialog v-model="showEditor" title="editor" width="1000" draggable overflow>
+        <el-select v-if="identity !== '1'" v-model="initLanguage" class="m-2" placeholder="Select" size="small"
+            style="width: 240px" @change="changeEditorLanguage">
+            <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <el-button v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭' }}共享编辑</el-button>
+        <div class="editor-box">
+            <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" @mounted="watchCodeText"
+                @unmounted="unCodeTextWatchFn" />
+        </div>
+        <!-- <template #footer>
+
+            <div class="dialog-footer">
+
+                <el-button @click="showEditor = false">Cancel</el-button>
+                <el-button type="primary" @click="showEditor = false">
+                    Confirm
+                </el-button>
+            </div>
+        </template> -->
+    </el-dialog>
 </template>
 <script setup>
 import MessageBubble from '../../components/messagebubble/index.vue'
-import { onMounted, ref, h, render, watch } from 'vue';
+import Editor from '../../components/editor/index.vue'
+import { onMounted, ref, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPushURL, getPlayerURL } from '../../request'
-import { getInfo } from '../../utils/util'
+import { getInfo, debounce } from '../../utils/util'
 import client from '../../utils/socket'
 const route = useRoute();
 const userInfo = getInfo()
 const identity = userInfo?.identity || '1'
 const identityRef = ref(identity)
 let sdk = null
-let msg = ref('')
+const msg = ref('')
+const code = ref('')
+const isReadOnly = ref(true)
+
 let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
-onMounted(async () => {
 
+const showEditor = ref(false)
+const editor = ref()
+const initLanguage = ref('javascript')
+const languageOptions = [
+    {
+        value: 'html',
+        label: 'html',
+    },
+    {
+        value: 'css',
+        label: 'css',
+    },
+    {
+        value: 'javascript',
+        label: 'javascript',
+    },
+    {
+        value: 'typescript',
+        label: 'typescript',
+    },
+    {
+        value: 'json',
+        label: 'json',
+    },
+]
+
+onMounted(async () => {
+    // 是学生就进行拉流
     if (identityRef.value === '1') {
         if (sdk) {
             sdk.close()
@@ -74,14 +126,29 @@ onMounted(async () => {
     })
 
     client.socket.on('connect', () => {
-        // console.log('连接成功');
+        console.log('连接成功');
     })
     client.socket.on('getMsg', (data) => {
         messageBox.value.push({ msg: data.msg, user: data.user })
     })
+    // 收到代码
+    client.socket.on('getCode', (data) => {
+        code.value = data.code // 用于保存学生端打开初始化的值
+        // isShare为false即学生端为只读,而这里的readOnly设为true才是只读,所以需要取反
+        isReadOnly.value = !(data.isShare)
+        editor.value && editor.value.setEditorValue(code.value)
+        // 当学生端打开
+        if (editor.value) {
+            if (identity == '1' && isReadOnly.value !== editor.value.getIsReadOnly()) {
+                editor.value.setReadOnly(!(data.isShare))
+            }
+        }
+
+    })
+
 })
 
-let startLive = async () => {
+const startLive = async () => {
     if (sdk) {
         sdk.close()
     }
@@ -100,8 +167,8 @@ let startLive = async () => {
     }
 }
 
-let sendMessage = () => {
-    client.sendMsg({ type: 'chat', roomId, msg: msg.value, user: userInfo }).then(res => {
+const sendMessage = () => {
+    client.sendMsg({ roomId, msg: msg.value, user: userInfo }).then(res => {
         if (res.code === '200') {
             messageBox.value.push({ msg: msg.value, user: userInfo, isOwn: true })
             msg.value = ''
@@ -115,9 +182,44 @@ watch(() => messageBox.value.length, (newVal, oldVal) => {
     }
 })
 
+const changeEditorLanguage = (e) => {
+    editor.value.changeLanguage(e)
+}
+
+let unCodeTextWatch = null
+// 当编辑器组件挂载之后
+const watchCodeText = () => {
+    // 这里使用watch来监听编辑器中的文本变化，并发送到服务器
+
+    unCodeTextWatch = watch(() => editor.value.text, debounce((newVal, oldVal) => {
+        client.sendCode({ roomId, code: newVal, isShare: isShare.value, user: userInfo }).then(res => {
+
+        })
+    }))
+
+}
+const unCodeTextWatchFn = () => {
+    unCodeTextWatch && unCodeTextWatch()
+}
+
+// 开启/关闭共享编辑
+const isShare = ref(false)
+const openShare = () => {
+    isShare.value = !isShare.value
+    client.sendCode({ roomId, code: editor.value.text, isShare: isShare.value, user: userInfo }).then(res => {
+
+    })
+}
+
 </script>
 <style lang='scss' scoped>
 .single-inner {
     margin-top: 30px;
+}
+
+.editor-box {
+    width: 100%;
+    height: 500px;
+    border: 1px solid #ccc;
 }
 </style>
