@@ -74,7 +74,7 @@ const identity = userInfo?.identity || '1'
 let sdk = null
 const msg = ref('')
 const code = ref('')
-let isReadOnly = identity === '1' ? true : false
+let isReadOnly = ref(identity === '1' ? true : false)
 
 let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
@@ -125,9 +125,6 @@ onMounted(async () => {
         roomId: roomId
     })
 
-    client.socket.on('connect', () => {
-        console.log('连接成功');
-    })
     client.socket.on('getMsg', (data) => {
         messageBox.value.push({ msg: data.msg, user: data.user })
     })
@@ -137,8 +134,8 @@ onMounted(async () => {
         editor.value && editor.value.setEditorValue(code.value)
     })
     client.socket.on('share', (data) => {
-        isReadOnly = data.readOnly;
-        editor.value && editor.value.setReadOnly(isReadOnly);
+        isReadOnly.value = data.readOnly;
+        editor.value && editor.value.setReadOnly(isReadOnly.value);
     })
 })
 

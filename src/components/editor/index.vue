@@ -28,7 +28,6 @@ onMounted(() => {
     emits('mounted')
     // 学生端打开代码编辑器,进行初始化
     const unwatch = watch(() => props.code, (newValue) => {
-
         text.value = newValue
         nextTick(() => {
             editor.setValue(newValue)
@@ -39,6 +38,7 @@ onMounted(() => {
     const unwatch2 = watch(() => props.isReadOnly, (newValue) => {
         isReadOnly.value = newValue
         nextTick(() => {
+            // 挂载之后,通过设置编辑器的只读,就不用管编辑器初始值是哪个了
             editor.updateOptions({ readOnly: newValue })
             // 不然就会导致值监听两次
             unwatch2()
