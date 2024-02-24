@@ -10,7 +10,7 @@
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
                         <div class="control">
-                            <el-button v-if="identityRef !== '1'" plain @click="startLive">开始直播</el-button>
+                            <el-button v-if="identity !== '1'" plain @click="startLive">开始直播</el-button>
                             <el-button plain @click="showEditor = true">代码编辑器</el-button>
                         </div>
                     </div>
@@ -70,11 +70,11 @@ import client from '../../utils/socket'
 const route = useRoute();
 const userInfo = getInfo()
 const identity = userInfo?.identity || '1'
-const identityRef = ref(identity)
+
 let sdk = null
 const msg = ref('')
 const code = ref('')
-const isReadOnly = ref(true)
+let isReadOnly = identity === '1' ? true : false
 
 let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
@@ -107,7 +107,7 @@ const languageOptions = [
 
 onMounted(async () => {
     // 是学生就进行拉流
-    if (identityRef.value === '1') {
+    if (identity === '1') {
         if (sdk) {
             sdk.close()
         }
@@ -134,18 +134,12 @@ onMounted(async () => {
     // 收到代码
     client.socket.on('getCode', (data) => {
         code.value = data.code // 用于保存学生端打开初始化的值
-        // isShare为false即学生端为只读,而这里的readOnly设为true才是只读,所以需要取反
-        isReadOnly.value = !(data.isShare)
         editor.value && editor.value.setEditorValue(code.value)
-        // 当学生端打开
-        if (editor.value) {
-            if (identity == '1' && isReadOnly.value !== editor.value.getIsReadOnly()) {
-                editor.value.setReadOnly(!(data.isShare))
-            }
-        }
-
     })
-
+    client.socket.on('share', (data) => {
+        isReadOnly = data.readOnly;
+        editor.value && editor.value.setReadOnly(isReadOnly);
+    })
 })
 
 const startLive = async () => {
@@ -159,7 +153,6 @@ const startLive = async () => {
     try {
         let session = await sdk.publish(result.stream_url)
         document.getElementById('screen').srcObject = sdk.screen
-        // document.getElementById('sounds').srcObject = sdk.audio
 
     } catch (e) {
         console.log(e);
@@ -189,14 +182,10 @@ const changeEditorLanguage = (e) => {
 let unCodeTextWatch = null
 // 当编辑器组件挂载之后
 const watchCodeText = () => {
-    // 这里使用watch来监听编辑器中的文本变化，并发送到服务器
-
+    // 教师/学生的监听
     unCodeTextWatch = watch(() => editor.value.text, debounce((newVal, oldVal) => {
-        client.sendCode({ roomId, code: newVal, isShare: isShare.value, user: userInfo }).then(res => {
-
-        })
+        client.sendCode({ roomId, code: newVal, user: userInfo }).then(res => { })
     }))
-
 }
 const unCodeTextWatchFn = () => {
     unCodeTextWatch && unCodeTextWatch()
@@ -204,11 +193,10 @@ const unCodeTextWatchFn = () => {
 
 // 开启/关闭共享编辑
 const isShare = ref(false)
+let shareWatch = null
 const openShare = () => {
     isShare.value = !isShare.value
-    client.sendCode({ roomId, code: editor.value.text, isShare: isShare.value, user: userInfo }).then(res => {
-
-    })
+    client.openShare({ roomId, user: userInfo, isShare: isShare.value })
 }
 
 </script>

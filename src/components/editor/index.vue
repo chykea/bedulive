@@ -37,7 +37,6 @@ onMounted(() => {
         })
     }, { immediate: true })
     const unwatch2 = watch(() => props.isReadOnly, (newValue) => {
-
         isReadOnly.value = newValue
         nextTick(() => {
             editor.updateOptions({ readOnly: newValue })
@@ -137,7 +136,6 @@ const setEditorValue = (value) => {
         editor.setValue(value)
     })
 }
-
 const getIsReadOnly = () => {
     return editor.getOption(monaco.editor.EditorOption.readOnly)
 }

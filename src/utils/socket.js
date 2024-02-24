@@ -25,15 +25,21 @@ class createSocket {
             })
         })
     }
-    sendCode({ roomId, code, user, isShare }) {
+    sendCode({ roomId, code, user }) {
         // if (!code) return
         return new Promise((resolve, reject) => {
-            this.socket.emit('sendMsg', { type: 'code', roomId, user, code, isShare }, (data) => {
+            this.socket.emit('sendMsg', { type: 'code', roomId, user, code }, (data) => {
                 resolve(data)
             })
         })
     }
-
+    openShare({ roomId, user, isShare }) {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('openShare', { roomId, user, isShare }, (data) => {
+                resolve(data)
+            })
+        })
+    }
 }
 
 export default new createSocket()
