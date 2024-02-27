@@ -12,6 +12,7 @@
                         <div class="control">
                             <el-button v-if="identity !== '1'" plain @click="startLive">开始直播</el-button>
                             <el-button plain @click="showEditor = true">代码编辑器</el-button>
+                            <el-button plain @click="openDrawBroad">画板</el-button>
                         </div>
                     </div>
                 </div>
@@ -37,7 +38,7 @@
             </div>
         </div>
     </section>
-    <el-dialog v-model="showEditor" title="editor" width="1000" draggable overflow>
+    <el-dialog overflow draggable v-model="showEditor" title="editor" width="1000">
         <el-select v-if="identity !== '1'" v-model="initLanguage" class="m-2" placeholder="Select" size="small"
             style="width: 240px" @change="changeEditorLanguage">
             <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
@@ -47,26 +48,22 @@
             <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" @mounted="watchCodeText"
                 @unmounted="unCodeTextWatchFn" />
         </div>
-        <!-- <template #footer>
+    </el-dialog>
+    <el-dialog draggable v-model="showDrawBroad" title="drawbroad" width="1000">
+        <DrawBroad ref="drawBroad" />
 
-            <div class="dialog-footer">
-
-                <el-button @click="showEditor = false">Cancel</el-button>
-                <el-button type="primary" @click="showEditor = false">
-                    Confirm
-                </el-button>
-            </div>
-        </template> -->
     </el-dialog>
 </template>
 <script setup>
 import MessageBubble from '../../components/messagebubble/index.vue'
 import Editor from '../../components/editor/index.vue'
-import { onMounted, ref, watch, nextTick } from 'vue';
+import DrawBroad from '../../components/drawbroad/index.vue'
+import { onMounted, ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPushURL, getPlayerURL } from '../../request'
 import { getInfo, debounce } from '../../utils/util'
-import client from '../../utils/socket'
+import { getSocket } from '../../utils/socket'
+const client = getSocket()
 const route = useRoute();
 const userInfo = getInfo()
 const identity = userInfo?.identity || '1'
@@ -80,7 +77,9 @@ let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
 
 const showEditor = ref(false)
+const showDrawBroad = ref(false)
 const editor = ref()
+const drawBroad = ref()
 const initLanguage = ref('javascript')
 const languageOptions = [
     {
@@ -119,12 +118,10 @@ onMounted(async () => {
         document.getElementById('screen').srcObject = sdk.screen
 
     }
-
     client.join({
         user: userInfo,
         roomId: roomId
     })
-
     client.socket.on('getMsg', (data) => {
         messageBox.value.push({ msg: data.msg, user: data.user })
     })
@@ -137,6 +134,10 @@ onMounted(async () => {
         isReadOnly.value = data.readOnly;
         editor.value && editor.value.setReadOnly(isReadOnly.value);
     })
+})
+
+onBeforeUnmount(() => {
+    client.leave(roomId)
 })
 
 const startLive = async () => {
@@ -190,10 +191,13 @@ const unCodeTextWatchFn = () => {
 
 // 开启/关闭共享编辑
 const isShare = ref(false)
-let shareWatch = null
 const openShare = () => {
     isShare.value = !isShare.value
     client.openShare({ roomId, user: userInfo, isShare: isShare.value })
+}
+
+const openDrawBroad = () => {
+    showDrawBroad.value = true;
 }
 
 </script>

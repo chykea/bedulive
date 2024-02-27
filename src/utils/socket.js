@@ -40,6 +40,23 @@ class createSocket {
             })
         })
     }
-}
+    sendPaint({ roomId, user, data }) {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('sendPaint', { roomId, user, data }, (data) => {
 
-export default new createSocket()
+            })
+        })
+    }
+}
+function initSocket() {
+    let socket = null
+    return () => {
+        if (!socket) {
+            socket = new createSocket()
+        }
+        return socket
+    }
+}
+const getSocket = initSocket()
+// export default new createSocket()
+export { getSocket }
