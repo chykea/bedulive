@@ -25,21 +25,16 @@ let roomId = route.query.roomId || userInfo.uid
 const client = getSocket()
 
 
-// const text = ref('')
 const isReadOnly = ref(false)
 // 编辑🔒,防止在设置值的导致监听到时又把设置的值发送
 let editorLock = false
 
-
-const emits = defineEmits(['mounted', 'unmounted'])
 onMounted(() => {
-    emits('mounted')
     // 学生端打开代码编辑器,进行初始化
     watch(() => props.code, (newValue) => {
         nextTick(() => {
             editorLock = true
             editor.setValue(newValue)
-            // unwatch()
         })
     }, { immediate: true })
     watch(() => props.isReadOnly, (newValue) => {
@@ -52,8 +47,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     editor.dispose()
-    // 卸载监听函数
-    emits('unmounted')
+
 })
 
 
@@ -108,14 +102,15 @@ const editorInit = () => {
             editor.setValue("");
         // 监听值的变化
         // 编辑的代码发生变化时
-        editor.onDidChangeModelContent((val) => {
+        editor.onDidChangeModelContent(debounce((val) => {
             if (!editorLock) { // 为true时不执行
                 if (!isReadOnly.value) {
+                    console.log(editor.getValue());
                     client.sendCode({ roomId, code: editor.getValue(), user: userInfo }).then(res => { })
                 }
             }
             editorLock = false
-        })
+        }))
     })
 }
 editorInit()
@@ -123,17 +118,10 @@ editorInit()
 const historyMap = new Map()
 const changeLanguage = (language) => {
     // 存储当前语言编辑的代码
-    historyMap.set(editor.getModel().getLanguageIdAtPosition(), text.value)
+    historyMap.set(editor.getModel().getLanguageIdAtPosition(), editor.getValue())
     monaco.editor.setModelLanguage(editor.getModel(), language)
-    // 清除当前代码
-    // text.value = ''
-    editor.setValue('')
-    // 把之前存储的代码回显
-    if (historyMap.get(language)) {
-
-        text.value = historyMap.get(language)
-        editor.setValue(historyMap.get(language))
-    }
+    // 清除/回显代码
+    historyMap.get(language) ? editor.setValue(historyMap.get(language)) : editor.setValue('')
 }
 const setReadOnly = (val) => {
     nextTick(() => {

@@ -44,8 +44,7 @@
         </el-select>
         <el-button v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭' }}共享编辑</el-button>
         <div class="editor-box">
-            <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" @mounted="watchCodeText"
-                @unmounted="unCodeTextWatchFn" />
+            <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" />
         </div>
     </el-dialog>
     <el-dialog draggable v-model="showDrawBroad" title="drawbroad" width="1000">
@@ -174,17 +173,6 @@ const changeEditorLanguage = (e) => {
     editor.value.changeLanguage(e)
 }
 
-let unCodeTextWatch = null
-// 当编辑器组件挂载之后
-const watchCodeText = () => {
-    // 教师/学生的监听
-    // unCodeTextWatch = watch(() => editor.value.text, debounce((newVal, oldVal) => {
-    //     client.sendCode({ roomId, code: newVal, user: userInfo }).then(res => { })
-    // }))
-}
-const unCodeTextWatchFn = () => {
-    unCodeTextWatch && unCodeTextWatch()
-}
 
 // 开启/关闭共享编辑
 const isShare = ref(false)
@@ -196,6 +184,7 @@ const openShare = () => {
 const openDrawBroad = () => {
     showDrawBroad.value = true;
 }
+
 
 const initImage = ref('')
 client.socket.on('initImage', (data) => {
