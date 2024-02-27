@@ -107,6 +107,7 @@ class Palette {
         }
     }
     drawImage(data) {
+        if (!data) return
         let img = new Image();
         img.src = data;
         img.onload = () => {

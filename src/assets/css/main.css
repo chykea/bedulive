@@ -5795,7 +5795,7 @@ blockquote .shape {
 
 .messages-body .chat-list .reply-block input {
   height: 50px;
-  width: 280px;
+  width: calc(100% - 40px);
   color: #081828;
   border: none;
   /* padding: 0px 20px; */

@@ -32,11 +32,20 @@
     </div>
 </template>
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DrawBroad from '../../utils/drawbroad'
 import { getSocket } from '../../utils/socket'
 import { getInfo, debounce } from '../../utils/util'
+
+const props = defineProps({
+    initImage: {
+        type: String,
+        default: ''
+    }
+})
+
+
 const client = getSocket()
 const route = useRoute()
 const userInfo = getInfo()
@@ -50,6 +59,7 @@ const lineWidth = ref(5)
 const allowCancel = ref(true)
 const allowGo = ref(true)
 const sides = ref(3)
+
 const handleList = [
     { name: '圆', type: 'arc' },
     { name: '线条', type: 'line' },
@@ -91,6 +101,13 @@ onMounted(() => {
         allowCallback: allowCallback,
         moveCallback: moveCallback
     })
+    let unwatch = watch(() => props.initImage, (newVal) => {
+        drawbroadInstance.imgSrc = newVal;
+        drawbroadInstance.drawImage(newVal)
+        nextTick(() => {
+            unwatch()
+        })
+    }, { immediate: true })
 })
 const sidesChange = (sides) => { // 改变多边形边数
     nextTick(() => {

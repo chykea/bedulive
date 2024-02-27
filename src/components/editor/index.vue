@@ -11,37 +11,41 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
 import { nextTick, ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { getInfo, debounce } from '../../utils/util'
+import { getSocket } from '../../utils/socket'
 
 const props = defineProps({
     code: { type: String, default: '' },
     isReadOnly: { Boolean, default: false }
 })
+const route = useRoute()
+const userInfo = getInfo()
+let roomId = route.query.roomId || userInfo.uid
+const client = getSocket()
 
 
-const text = ref('')
+// const text = ref('')
 const isReadOnly = ref(false)
-
+// 编辑🔒,防止在设置值的导致监听到时又把设置的值发送
+let editorLock = false
 
 
 const emits = defineEmits(['mounted', 'unmounted'])
 onMounted(() => {
     emits('mounted')
     // 学生端打开代码编辑器,进行初始化
-    const unwatch = watch(() => props.code, (newValue) => {
-        text.value = newValue
+    watch(() => props.code, (newValue) => {
         nextTick(() => {
+            editorLock = true
             editor.setValue(newValue)
-            // 不然就会导致值监听两次
-            unwatch()
+            // unwatch()
         })
     }, { immediate: true })
-    const unwatch2 = watch(() => props.isReadOnly, (newValue) => {
+    watch(() => props.isReadOnly, (newValue) => {
         isReadOnly.value = newValue
         nextTick(() => {
-            // 挂载之后,通过设置编辑器的只读,就不用管编辑器初始值是哪个了
             editor.updateOptions({ readOnly: newValue })
-            // 不然就会导致值监听两次
-            unwatch2()
         })
     }, { immediate: true })
 })
@@ -86,7 +90,7 @@ const editorInit = () => {
         });
 
         !editor ? editor = monaco.editor.create(document.getElementById('codeEditBox'), {
-            value: text.value, // 编辑器初始显示文字
+            value: "", // 编辑器初始显示文字
             language: 'javascript', // 语言支持自行查阅demo
             automaticLayout: true, // 自适应布局  
             theme: 'vs', // 官方自带三种主题vs, hc-black, or vs-dark
@@ -105,7 +109,12 @@ const editorInit = () => {
         // 监听值的变化
         // 编辑的代码发生变化时
         editor.onDidChangeModelContent((val) => {
-            text.value = editor.getValue();
+            if (!editorLock) { // 为true时不执行
+                if (!isReadOnly.value) {
+                    client.sendCode({ roomId, code: editor.getValue(), user: userInfo }).then(res => { })
+                }
+            }
+            editorLock = false
         })
     })
 }
@@ -142,7 +151,7 @@ const getIsReadOnly = () => {
 
 
 // 暴露属性/方法给父组件
-defineExpose({ text, changeLanguage, setReadOnly, setEditorValue, getIsReadOnly })
+defineExpose({ changeLanguage, setReadOnly, setEditorValue, getIsReadOnly })
 
 </script>
   

@@ -22,7 +22,6 @@
                             <div class="chat-list">
                                 <ul class="single-chat-head message-box">
                                     <template v-for="(item) in messageBox">
-                                        <!-- <div>{{ item }}</div> -->
                                         <MessageBubble :msg="item.msg" :user="item.user" :is-own="item.isOwn" />
                                     </template>
                                 </ul>
@@ -50,7 +49,7 @@
         </div>
     </el-dialog>
     <el-dialog draggable v-model="showDrawBroad" title="drawbroad" width="1000">
-        <DrawBroad ref="drawBroad" />
+        <DrawBroad ref="drawBroad" :initImage="initImage" />
 
     </el-dialog>
 </template>
@@ -71,7 +70,7 @@ const identity = userInfo?.identity || '1'
 let sdk = null
 const msg = ref('')
 const code = ref('')
-let isReadOnly = ref(identity === '1' ? true : false)
+let isReadOnly = ref(false)
 
 let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
@@ -128,11 +127,9 @@ onMounted(async () => {
     // 收到代码
     client.socket.on('getCode', (data) => {
         code.value = data.code // 用于保存学生端打开初始化的值
-        editor.value && editor.value.setEditorValue(code.value)
     })
     client.socket.on('share', (data) => {
         isReadOnly.value = data.readOnly;
-        editor.value && editor.value.setReadOnly(isReadOnly.value);
     })
 })
 
@@ -181,9 +178,9 @@ let unCodeTextWatch = null
 // 当编辑器组件挂载之后
 const watchCodeText = () => {
     // 教师/学生的监听
-    unCodeTextWatch = watch(() => editor.value.text, debounce((newVal, oldVal) => {
-        client.sendCode({ roomId, code: newVal, user: userInfo }).then(res => { })
-    }))
+    // unCodeTextWatch = watch(() => editor.value.text, debounce((newVal, oldVal) => {
+    //     client.sendCode({ roomId, code: newVal, user: userInfo }).then(res => { })
+    // }))
 }
 const unCodeTextWatchFn = () => {
     unCodeTextWatch && unCodeTextWatch()
@@ -200,10 +197,36 @@ const openDrawBroad = () => {
     showDrawBroad.value = true;
 }
 
+const initImage = ref('')
+client.socket.on('initImage', (data) => {
+    if (!data) return
+    initImage.value = data.imgSrc
+})
+client.socket.on('initCode', (data) => {
+    if (!data) return
+    code.value = data.code // 用于保存学生端打开初始化的值
+})
+client.socket.on('initSetting', (data) => {
+    // 如果没有编辑过,并且不是教师端
+    if (!data && identity == '1') {
+        // 编辑器则为只读
+        isReadOnly.value = true
+        return
+    }
+    // 只控制学生端
+    if (identity == '1') {
+        isReadOnly.value = data.readOnly;
+    }
+})
+
 </script>
 <style lang='scss' scoped>
 .single-inner {
     margin-top: 30px;
+}
+
+.control {
+    margin-top: 10px;
 }
 
 .editor-box {
