@@ -10,13 +10,15 @@
                     <el-color-picker v-model="color" show-alpha @change="colorChange"></el-color-picker>
                 </div>
 
-                <el-button v-if="!['color', 'lineWidth', 'polygon'].includes(v.type)" @click="handleClick(v)">
+                <el-button v-if="!['color', 'lineWidth', 'polygon'].includes(v.type)" @click="handleClick(v)"
+                    :class="{ active: currHandle === v.type }">
                     {{ v.name }}
                 </el-button>
                 <el-popover placement="top" width="175" trigger="click" v-if="v.type === 'polygon'">
                     <el-input-number v-model="sides" @change="sidesChange" :min="3" :max="10"></el-input-number>
                     <template #reference>
-                        <el-button>{{ v.name }}</el-button>
+                        <el-button @click="handleClick(v)" :class="{ active: currHandle === v.type }">{{ v.name
+                        }}</el-button>
                     </template>
                 </el-popover>
                 <el-popover placement="top" width="400" trigger="click" v-if="v.type === 'lineWidth'">
@@ -24,7 +26,6 @@
                     <template #reference>
                         <el-button>{{ v.name }} <i>{{ lineWidth + 'px' }}</i></el-button>
                     </template>
-
                 </el-popover>
             </li>
         </ul>
@@ -110,6 +111,11 @@ const handleClick = (v) => { // 操作按钮
     if (['cancel', 'go', 'clear'].includes(v.type)) {
         moveCallback(v.type);
         drawbroadInstance[v.type]();
+        client.socket.emit('sendPaint', {
+            roomId,
+            user: userInfo,
+            data: drawbroadInstance.imgSrc
+        })
         return;
     }
     drawbroadInstance.changeWay({ type: v.type });
