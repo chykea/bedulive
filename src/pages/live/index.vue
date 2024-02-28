@@ -10,9 +10,10 @@
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
                         <div class="control">
-                            <el-button v-if="identity !== '1'" plain @click="startLive">开始直播</el-button>
-                            <el-button plain @click="showEditor = true">代码编辑器</el-button>
-                            <el-button plain @click="openDrawBroad">画板</el-button>
+                            <el-button class="custom-el-btn-color" v-if="identity !== '1'" plain
+                                @click="startLive">开始直播</el-button>
+                            <el-button class="custom-el-btn-color" plain @click="showEditor = true">代码编辑器</el-button>
+                            <el-button class="custom-el-btn-color" plain @click="openDrawBroad">画板</el-button>
                         </div>
                     </div>
                 </div>
@@ -42,7 +43,7 @@
             style="width: 240px" @change="changeEditorLanguage">
             <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-button v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭' }}共享编辑</el-button>
+        <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭' }}共享编辑</el-button>
         <div class="editor-box">
             <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" />
         </div>

@@ -42,7 +42,7 @@
                                 </el-input>
                             </el-form-item>
                             <el-form-item label="" class="button">
-                                <el-button type="primary" class="btn" @click="registerFunc(formDataRef)"
+                                <el-button type="primary" class="btn custom-el-btn-color" @click="registerFunc(formDataRef)"
                                     size="large">注册</el-button>
                             </el-form-item>
                             <p class="outer-link">已有账号？ <router-link to="/user/login"> 返回登录</router-link>

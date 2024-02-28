@@ -1,0 +1,4 @@
+.custom-el-btn-color {
+    --el-button-hover-text-color: #5830E0 !important;
+    --el-button-hover-border-color: #5830E0 !important;
+}

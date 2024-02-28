@@ -11,20 +11,21 @@
                 </div>
 
                 <el-button v-if="!['color', 'lineWidth', 'polygon'].includes(v.type)" @click="handleClick(v)"
-                    :class="{ active: currHandle === v.type }">
+                    :class="{ active: currHandle === v.type }" class="custom-el-btn-color">
                     {{ v.name }}
                 </el-button>
                 <el-popover placement="top" width="175" trigger="click" v-if="v.type === 'polygon'">
                     <el-input-number v-model="sides" @change="sidesChange" :min="3" :max="10"></el-input-number>
                     <template #reference>
-                        <el-button @click="handleClick(v)" :class="{ active: currHandle === v.type }">{{ v.name
-                        }}</el-button>
+                        <el-button @click="handleClick(v)" :class="{ active: currHandle === v.type }"
+                            class="custom-el-btn-color">{{ v.name
+                            }}</el-button>
                     </template>
                 </el-popover>
                 <el-popover placement="top" width="400" trigger="click" v-if="v.type === 'lineWidth'">
                     <el-slider v-model="lineWidth" :max=20 @change="lineWidthChange"></el-slider>
                     <template #reference>
-                        <el-button>{{ v.name }} <i>{{ lineWidth + 'px' }}</i></el-button>
+                        <el-button class="custom-el-btn-color">{{ v.name }} <i>{{ lineWidth + 'px' }}</i></el-button>
                     </template>
                 </el-popover>
             </li>

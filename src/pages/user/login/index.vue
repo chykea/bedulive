@@ -40,7 +40,7 @@
                                 </div>
                             </div>
                             <el-form-item class="button">
-                                <el-button class="btn" type="primary" @click="loginFunc(formDataRef)"
+                                <el-button class="btn custom-el-btn-color" type="primary" @click="loginFunc(formDataRef)"
                                     size="large">登录</el-button>
                             </el-form-item>
                             <p class="outer-link">没有账号? <router-link to="/user/register">点击注册</router-link></p>
