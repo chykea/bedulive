@@ -1,15 +1,17 @@
 
 
 const getToken = () => {
-    const token = sessionStorage.getItem('token');
-    return token ? token : null;
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    return user ? user.token : null;
 }
 const getInfo = () => {
-    const userInfo = sessionStorage.getItem('userInfo');
-    return userInfo ? JSON.parse(userInfo) : null;
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    return user ? user.userInfo : null;
 }
-const debounce = (func, wait = 750, immediate) => {
 
+
+
+const debounce = (func, wait = 750, immediate) => {
     let timeout;
 
     return function () {

@@ -4945,9 +4945,9 @@ blockquote .shape {
 
 .dashboard-sidebar .user-image {
   position: relative;
-  padding: 30px;
+  padding: 30px 100px;
   border-bottom: 1px solid #eee;
-  padding-left: 100px;
+  /* padding-left: 100px; */
   padding-bottom: 40px;
 }
 

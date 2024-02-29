@@ -9,12 +9,17 @@ function login(params) {
 function register(params) {
     return http.post(prefix + '/register', qs.stringify(params))
 }
-// 获取用户信息
-function getUserInfo(params) {
-    return http.get(prefix + '/info', qs.stringify(params))
+// 修改密码
+function changePassword(params) {
+    return http.post(prefix + '/changePassword', qs.stringify(params))
+}
+// 修改个人信息
+function changeInfo(params) {
+    return http.post(prefix + '/changeInfo', qs.stringify(params))
 }
 export {
     login,
     register,
-    getUserInfo
+    changePassword,
+    changeInfo
 }

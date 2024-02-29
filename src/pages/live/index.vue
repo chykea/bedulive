@@ -43,7 +43,8 @@
             style="width: 240px" @change="changeEditorLanguage">
             <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭' }}共享编辑</el-button>
+        <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭'
+        }}共享编辑</el-button>
         <div class="editor-box">
             <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" />
         </div>

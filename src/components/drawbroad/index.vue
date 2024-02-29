@@ -36,8 +36,8 @@
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DrawBroad from '../../utils/drawbroad'
-import { getSocket } from '../../utils/socket'
-import { getInfo, debounce } from '../../utils/util'
+import { getSocket } from '../../utils/socket.js'
+import { getInfo, debounce } from '../../utils/util.js'
 
 const props = defineProps({
     initImage: {

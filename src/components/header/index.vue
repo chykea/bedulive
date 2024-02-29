@@ -6,7 +6,7 @@
                     <div class="nav-inner">
                         <nav class="navbar navbar-expand-lg">
                             <router-link class="navbar-brand" to="/">
-                                <img src="../../assets/images/logo/logo.svg" alt="Logo">
+                                <img src="../../assets/images/logo/logo.svg" alt="Logo" />
                             </router-link>
                             <!-- 页面放大后出现的 -->
                             <button class="navbar-toggler mobile-menu-btn" type="button">
@@ -27,17 +27,15 @@
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
                                             to="/notes">笔记</router-link>
-
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
                                             to="/liveList">直播</router-link>
-
                                     </li>
                                 </ul>
                             </div>
                             <!-- 登录注册按钮 -->
-                            <div class="user-button" v-if="!getToken()">
+                            <div class="user-button" v-if="!token">
                                 <ul>
                                     <li>
                                         <router-link to="/user/login"><i class="lni lni-enter"></i> 登录</router-link>
@@ -50,12 +48,16 @@
                             <div class="user-button" v-else>
                                 <ul>
                                     <router-link to="/user/info">
-                                        <li><el-avatar> user </el-avatar></li>
-                                        <li><a href="javascript:void(0)">{{ userInfo.nick_name }}</a></li>
+                                        <li><el-avatar> {{ firstName }} </el-avatar></li>
+                                        <li>
+                                            <a href="javascript:void(0)">{{ userInfo.nick_name }}</a>
+                                        </li>
                                     </router-link>
                                 </ul>
+
                             </div>
-                            <div class="button header-button" v-if="userInfo.identity == '0' || userInfo.identity == '2'">
+                            <div class="button header-button"
+                                v-if="userInfo && (userInfo.identity == '0' || userInfo.identity == '2')">
                                 <router-link to="/live" class="btn">开始上课</router-link>
                             </div>
                         </nav>
@@ -66,16 +68,17 @@
     </header>
 </template>
 <script setup>
-import { ref } from 'vue';
-import { getToken, getInfo } from '../../utils/util'
-const userInfo = ref({})
-try {
-
-    const { user_name, nick_name, identity } = getInfo()
-    userInfo.value = { user_name, nick_name, identity }
-} catch (e) {
-
-}
+import { ref, onMounted, watchEffect } from "vue";
+import { useRootStore } from "../../store/index";
+const store = useRootStore();
+const userInfo = ref(store.userInfo);
+const token = ref(store.token);
+const firstName = ref('');
+watchEffect(() => {
+    token.value = store.token
+    userInfo.value = store.userInfo
+    firstName.value = userInfo.value.nick_name.substring(0, 1)
+})
 
 </script>
 <style lang="scss" scoped></style>

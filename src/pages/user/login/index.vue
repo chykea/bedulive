@@ -64,10 +64,11 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus';
 import { login } from '../../../request/index'		//这里使用自行封装的axios，下文已给出，照搬后修改运行端口即可
 import { useRouter } from 'vue-router';
+import { useRootStore } from '../../../store/index'
 
-// const { user: { login, register } } = api
+
 const router = useRouter();
-// const checkCodeUrl = "api/checkCode?" + new Date().getTime();
+const store = useRootStore()
 //表单
 const formDataRef = ref();
 let formData = reactive({
@@ -94,7 +95,7 @@ const loginFunc = async (formEl) => {
 
             try {
                 const { data } = await login(form_obj)
-                const { token, ...result } = data.result
+                const { token, id, ...result } = data.result
 
                 ElMessage({
                     message: data.message,
@@ -102,15 +103,17 @@ const loginFunc = async (formEl) => {
                     type: 'success',
                     onClose: () => {
                         const userInfo = result
-                        // 登录成功后，将token存储到localStorage中
-                        sessionStorage.setItem('token', token)
-                        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+                        // 登录成功后，将token存储到sessionStorage中
+                        store.token = token
+                        store.userInfo = userInfo
+                        // sessionStorage.setItem('token', token)
+                        // sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                         router.push('/')
                     }
                 })
 
             } catch (e) {
-                console.log('登录失败');
+                ElMessage({ message: '密码错误', duration: 1000, type: 'error' })
             }
 
         } else {

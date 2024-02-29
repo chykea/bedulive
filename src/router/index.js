@@ -5,10 +5,13 @@ const router = createRouter({
     extendRoutes: (routes) => {
         // 在自动生成的routes数组,对符合条件的路由进行加工
         const route = routes.map(r => {
-            // 重定向
-            return r.path === '/user' ? { ...r, redirect: '/user/login' } : r;
+            if (r.path === '/user') {
+                // 重定向
+                r = { ...r, redirect: '/user/login' }
+            }
+            return r
         })
-        // console.log(route);
+        console.log(route);
         // 返回结果一定是routes,自动配置中会把返回的routes作为路由规则
 
         return route
