@@ -1953,7 +1953,6 @@ ol {
     Hero Area CSS
 ========================================*/
 .hero-area {
-  background-image: url("../images/hero/hero-bg.jpg");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -1971,8 +1970,8 @@ ol {
 
 .hero-area.style2 {
   padding-top: 150px;
-  padding-bottom: 100px;
-  background-image: url("../images/hero/hero-bg2.jpg");
+  padding-bottom: 228px;
+  background-image: url(../images/hero/hero-bg3.jpg);
 }
 
 .hero-area.style2 .hero-text {

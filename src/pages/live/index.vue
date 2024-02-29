@@ -6,11 +6,16 @@
             <div class="row">
                 <div class="col-lg-8  col-12">
                     <div class="single-inner">
+                        <div class="post-details">
+                            <div class="detail-inner">
+                                <h2 class="post-title"></h2>
+                            </div>
+                        </div>
                         <div class="post-thumbnils">
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
                         <div class="control">
-                            <el-button class="custom-el-btn-color" v-if="identity !== '1'" plain
+                            <el-button class="custom-el-btn-color" v-if="identity !== '1' && roomId == userInfo.uid" plain
                                 @click="startLive">开始直播</el-button>
                             <el-button class="custom-el-btn-color" plain @click="showEditor = true">代码编辑器</el-button>
                             <el-button class="custom-el-btn-color" plain @click="openDrawBroad">画板</el-button>
@@ -59,8 +64,8 @@ import MessageBubble from '../../components/messagebubble/index.vue'
 import Editor from '../../components/editor/index.vue'
 import DrawBroad from '../../components/drawbroad/index.vue'
 import { onMounted, ref, watch, nextTick, onBeforeUnmount } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getPushURL, getPlayerURL } from '../../request'
+import { useRoute, } from 'vue-router';
+import { getPushURL, getPlayerURL, setLiveInfo } from '../../request'
 import { getInfo, debounce } from '../../utils/util'
 import { getSocket } from '../../utils/socket'
 const client = getSocket()
@@ -118,6 +123,7 @@ onMounted(async () => {
         document.getElementById('screen').srcObject = sdk.screen
 
     }
+
     client.join({
         user: userInfo,
         roomId: roomId

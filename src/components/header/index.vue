@@ -68,17 +68,19 @@
     </header>
 </template>
 <script setup>
-import { ref, onMounted, watchEffect } from "vue";
+import { ref, onMounted, computed, watchEffect, watch } from "vue";
 import { useRootStore } from "../../store/index";
 const store = useRootStore();
 const userInfo = ref(store.userInfo);
 const token = ref(store.token);
-const firstName = ref('');
-watchEffect(() => {
-    token.value = store.token
-    userInfo.value = store.userInfo
-    firstName.value = userInfo.value.nick_name.substring(0, 1)
+watch(() => store.token, (newVal) => {
+    token.value = newVal
 })
+watch(() => store.userInfo, (newVal) => {
+    userInfo.value = newVal
+})
+let firstName = computed(() => userInfo.value.nick_name.substring(0, 1))
+
 
 </script>
 <style lang="scss" scoped></style>

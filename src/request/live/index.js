@@ -3,7 +3,7 @@ import qs from 'qs'
 const prefix = '/live'
 
 function getLiveList(params) {
-
+    return http.get(prefix + '/getLiveList')
 }
 function getPlayerURL(params) {
     return http.get(prefix + '/getPlayerURL' + `?roomId=${params}`)
@@ -11,7 +11,10 @@ function getPlayerURL(params) {
 function getPushURL() {
     return http.get(prefix + '/getPushURL')
 }
+function setLiveInfo(params) {
+    return http.post(prefix + '/setLiveInfo', qs.stringify(params))
+}
 export {
-    getLiveList,
-    getPushURL, getPlayerURL
+    getLiveList, setLiveInfo,
+    getPushURL, getPlayerURL,
 }

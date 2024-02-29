@@ -21,7 +21,7 @@
                                 </li>
                             </ul>
                             <div class="button">
-                                <a class="btn" href="javascript:void(0)" @click="logout">推出登录</a>
+                                <a class="btn" href="javascript:void(0)" @click="logout">退出登录</a>
                             </div>
                         </div>
                     </div>
@@ -239,13 +239,13 @@ const changeUserInfo = (formEle) => {
 // 退出登录
 const logout = () => {
     store.token = ''
-    store.userInfo = null
-    sessionStorage.removeItem('user')
+    store.userInfo = {}
     ElMessage({
         message: '退出成功',
         duration: 1500,
         type: 'success',
         onClose: () => {
+
             router.push('/user/login')
         }
     })

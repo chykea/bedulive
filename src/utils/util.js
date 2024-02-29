@@ -2,11 +2,11 @@
 
 const getToken = () => {
     const user = JSON.parse(sessionStorage.getItem('user'));
-    return user ? user.token : null;
+    return user && user.token ? user.token : null;
 }
 const getInfo = () => {
     const user = JSON.parse(sessionStorage.getItem('user'));
-    return user ? user.userInfo : null;
+    return user && user.userInfo ? user.userInfo : null;
 }
 
 
