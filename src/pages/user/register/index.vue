@@ -33,7 +33,7 @@
                             </el-form-item>
                             <el-form-item prop="confirm_password" class="form-group">
                                 <el-input placeholder="请确认密码" v-model="formData.confirm_password" size="large"
-                                    type="password" @keyup.enter.native="registerFunc">
+                                    type="password" @keyup.enter.native="registerFunc(formDataRef)">
                                     <template #prefix>
                                         <el-icon>
                                             <Lock />

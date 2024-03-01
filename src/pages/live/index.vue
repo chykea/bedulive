@@ -24,8 +24,10 @@
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
                         <div class="control">
-                            <el-button class="custom-el-btn-color" v-if="identity !== '1' && roomId == userInfo.uid" plain
-                                @click="startLive">开始直播</el-button>
+                            <el-button class="custom-el-btn-color" :disabled="sdk !== null"
+                                v-if="identity !== '1' && roomId == userInfo.uid" plain @click="startLive">开始直播</el-button>
+                            <el-button class="custom-el-btn-color" :disabled="sdk === null"
+                                v-if="identity !== '1' && roomId == userInfo.uid" plain @click="closeLive">关闭直播</el-button>
                             <el-button class="custom-el-btn-color" plain @click="showEditor = true">代码编辑器</el-button>
                             <el-button class="custom-el-btn-color" plain @click="openDrawBroad">画板</el-button>
                         </div>
@@ -82,7 +84,7 @@ const route = useRoute();
 const userInfo = getInfo()
 const identity = userInfo?.identity || '1'
 
-let sdk = null
+let sdk = ref(null)
 const msg = ref('')
 const code = ref('')
 let isReadOnly = ref(false)
@@ -122,17 +124,16 @@ const languageOptions = [
 onMounted(async () => {
     const { data } = await getLiveRoom(roomId)
     roomInfo.value = data.res
-    // 是学生就进行拉流
-    if (identity === '1') {
-        if (sdk) {
-            sdk.close()
+    // 不是主播就进行拉流
+    if (roomId !== userInfo.uid) {
+        if (sdk.value) {
+            sdk.value.close()
         }
-        sdk = new SrsRtcPlayerAsync();
+        sdk.value = new SrsRtcPlayerAsync();
 
         const { data: { result } } = await getPlayerURL(roomId)
-        // webrtc://192.168.106.130/bedulive/8adfc900-c64c-11ee-a36b-9f7cab65ec99
-        sdk.play(result.stream_url)
-        document.getElementById('screen').srcObject = sdk.screen
+        sdk.value.play(result.stream_url)
+        document.getElementById('screen').srcObject = sdk.value.screen
 
     }
 
@@ -157,20 +158,24 @@ onBeforeUnmount(() => {
 })
 
 const startLive = async () => {
-    if (sdk) {
-        sdk.close()
+    if (sdk.value) {
+        sdk.value.close()
     }
 
-    sdk = new SrsRtcPublishAsync();
+    sdk.value = new SrsRtcPublishAsync();
     const { data: { result } } = await getPushURL()
 
     try {
-        let session = await sdk.publish(result.stream_url)
-        document.getElementById('screen').srcObject = sdk.screen
-
+        let session = await sdk.value.publish(result.stream_url)
+        document.getElementById('screen').srcObject = sdk.value.screen
     } catch (e) {
-        console.log(e);
-        sdk.close()
+        sdk.value.close()
+    }
+}
+
+const closeLive = async () => {
+    if (sdk.value) {
+        sdk.value.close()
     }
 }
 
