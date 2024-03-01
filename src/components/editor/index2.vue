@@ -1,4 +1,21 @@
 <template>
+    <span>当前语言：</span>
+    <el-select v-model="language" class="m-2" placeholder="请选择类型" size="large" style="width: 120px"
+        @change="changeLanguage">
+        <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
+    </el-select>
+    <span>当前主题：</span>
+    <el-select v-model="theme" class="m-2" placeholder="请选择主题" size="large" style="width: 120px" @change="changeTheme">
+        <el-option v-for="item in themeOptions" :key="item.value" :label="item.label" :value="item.value" />
+    </el-select>
+    <span>当前字体大小：</span>
+    <el-popover placement="top" width="400" trigger="click">
+        <el-slider v-model="fontSize" :min="12" :max=30 @change="changeFontSize"></el-slider>
+        <template #reference>
+            <el-button class="custom-el-btn-color"><i>{{ fontSize + 'px' }}</i></el-button>
+        </template>
+    </el-popover>
+    <el-button @click="changeMinimap" class="custom-el-btn-color" plain>minimap</el-button>
     <div id="codeEditBox"></div>
 </template>
   
@@ -11,13 +28,54 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
-import { nextTick, ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { nextTick, ref, onBeforeUnmount, } from 'vue'
+import { debounce } from '../../utils/util'
 
+const language = ref('javascript')
+const theme = ref('vs')
+const fontSize = ref(16)
+const code = ref('')
+
+const languageOptions = [
+    {
+        value: 'html',
+        label: 'html',
+    },
+    {
+        value: 'css',
+        label: 'css',
+    },
+    {
+        value: 'javascript',
+        label: 'javascript',
+    },
+    {
+        value: 'typescript',
+        label: 'typescript',
+    },
+    {
+        value: 'json',
+        label: 'json',
+    },
+]
+const themeOptions = [
+    {
+        value: 'vs',
+        label: 'vs',
+    },
+    {
+        value: 'vs-dark',
+        label: 'vs-dark',
+    },
+    {
+        value: 'hc-black',
+        label: 'hc-black',
+    },
+]
 
 onBeforeUnmount(() => {
     editor.dispose()
 })
-
 
 // 在window中注册MonacoEnvironment
 self.MonacoEnvironment = {
@@ -68,6 +126,9 @@ const editorInit = () => {
             overviewRulerBorder: false, // 不要滚动条的边框  
         }) :
             editor.setValue("");
+        editor.onDidChangeModelContent(debounce((val) => {
+            code.value = editor.getValue()
+        }))
     })
 }
 editorInit()
@@ -80,8 +141,22 @@ const changeLanguage = (language) => {
     // 清除/回显代码
     historyMap.get(language) ? editor.setValue(historyMap.get(language)) : editor.setValue('')
 }
+const changeTheme = (theme) => {
+    monaco.editor.setTheme(theme)
+}
+const changeFontSize = (fontSize) => {
+    editor.updateOptions({ fontSize })
+}
+const changeMinimap = () => {
+    editor.updateOptions({
+        minimap: {
+            enabled: !editor.getOption(monaco.editor.EditorOption.minimap).enabled
+        }
+    })
+}
 
-defineExpose({ changeLanguage })
+
+
 
 
 
