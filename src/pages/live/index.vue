@@ -8,7 +8,16 @@
                     <div class="single-inner">
                         <div class="post-details">
                             <div class="detail-inner">
-                                <h2 class="post-title"></h2>
+                                <h2 class="post-title" v-show="!isUpdate">{{ roomInfo.title }}</h2>
+                                <el-input v-model="roomInfo.title" v-show="isUpdate"></el-input>
+                                <span style="vertical-align: middle;">当前老师:{{
+                                    roomInfo.nick_name
+                                }}</span>
+                                <el-button v-if="identity !== '1' && roomId == userInfo.uid" plain
+                                    style="margin-left: 10px;" class="custom-el-btn-color" @click="updateRoomInfo">{{
+                                        isUpdate ? '确认' : '修改标题'
+                                    }}</el-button>
+                                <p><span>当前在线人数:</span>{{ currentUser }}</p>
                             </div>
                         </div>
                         <div class="post-thumbnils">
@@ -63,9 +72,9 @@
 import MessageBubble from '../../components/messagebubble/index.vue'
 import Editor from '../../components/editor/index.vue'
 import DrawBroad from '../../components/drawbroad/index.vue'
-import { onMounted, ref, watch, nextTick, onBeforeUnmount } from 'vue';
+import { onMounted, ref, watch, reactive, onBeforeUnmount } from 'vue';
 import { useRoute, } from 'vue-router';
-import { getPushURL, getPlayerURL, setLiveInfo } from '../../request'
+import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom } from '../../request'
 import { getInfo, debounce } from '../../utils/util'
 import { getSocket } from '../../utils/socket'
 const client = getSocket()
@@ -80,6 +89,7 @@ let isReadOnly = ref(false)
 
 let roomId = route.query.roomId || userInfo.uid
 const messageBox = ref([])
+let roomInfo = ref({})
 
 const showEditor = ref(false)
 const showDrawBroad = ref(false)
@@ -110,6 +120,8 @@ const languageOptions = [
 ]
 
 onMounted(async () => {
+    const { data } = await getLiveRoom(roomId)
+    roomInfo.value = data.res
     // 是学生就进行拉流
     if (identity === '1') {
         if (sdk) {
@@ -214,6 +226,29 @@ client.socket.on('initSetting', (data) => {
     if (identity == '1') {
         isReadOnly.value = data.readOnly;
     }
+})
+
+const isUpdate = ref(false)
+const updateRoomInfo = async () => {
+    if (!isUpdate.value) {
+        isUpdate.value = !isUpdate.value
+    } else {
+        const params = {
+            uid: userInfo.uid,
+            title: roomInfo.value.title
+        }
+        // console.log(params);
+        const { data } = await setLiveInfo(params)
+        if (data.code == '0') {
+            isUpdate.value = !isUpdate.value
+            ElMessage.success('修改成功')
+        }
+    }
+}
+
+const currentUser = ref(0)
+client.socket.on('currentUser', (data) => {
+    currentUser.value = data
 })
 
 </script>

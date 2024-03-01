@@ -22,7 +22,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
-                                            to="/course">课程</router-link>
+                                            to="/tools">工具</router-link>
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"

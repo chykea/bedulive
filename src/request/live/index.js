@@ -2,8 +2,11 @@ import http from '../../utils/request'
 import qs from 'qs'
 const prefix = '/live'
 
-function getLiveList(params) {
+function getLiveList() {
     return http.get(prefix + '/getLiveList')
+}
+function getLiveRoom(params) {
+    return http.get(prefix + '/getLiveRoom' + `?roomId=${params}`)
 }
 function getPlayerURL(params) {
     return http.get(prefix + '/getPlayerURL' + `?roomId=${params}`)
@@ -17,4 +20,5 @@ function setLiveInfo(params) {
 export {
     getLiveList, setLiveInfo,
     getPushURL, getPlayerURL,
+    getLiveRoom,
 }
