@@ -9,6 +9,9 @@ const router = createRouter({
                 // 重定向
                 r = { ...r, redirect: '/user/login' }
             }
+            else if (r.path === '/article') {
+                r = { ...r, redirect: '/article/list' }
+            }
             return r
         })
         console.log(route);

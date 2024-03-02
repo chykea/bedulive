@@ -15,8 +15,8 @@
                                 }}</span>
                                 <el-button v-if="identity !== '1' && roomId == userInfo.uid" plain
                                     style="margin-left: 10px;" class="custom-el-btn-color" @click="updateRoomInfo">{{
-                                        isUpdate ? '确认' : '修改标题'
-                                    }}</el-button>
+                                    isUpdate ? '确认' : '修改标题'
+                                }}</el-button>
                                 <p><span>当前在线人数:</span>{{ currentUser }}</p>
                             </div>
                         </div>
@@ -24,10 +24,12 @@
                             <video width="840" id="screen" controls autoplay muted />
                         </div>
                         <div class="control">
-                            <el-button class="custom-el-btn-color" :disabled="sdk !== null"
-                                v-if="identity !== '1' && roomId == userInfo.uid" plain @click="startLive">开始直播</el-button>
-                            <el-button class="custom-el-btn-color" :disabled="sdk === null"
-                                v-if="identity !== '1' && roomId == userInfo.uid" plain @click="closeLive">关闭直播</el-button>
+                            <el-button class="custom-el-btn-color" :disabled="isLive"
+                                v-if="identity !== '1' && roomId == userInfo.uid" plain
+                                @click="startLive">开始直播</el-button>
+                            <el-button class="custom-el-btn-color" :disabled="!isLive"
+                                v-if="identity !== '1' && roomId == userInfo.uid" plain
+                                @click="closeLive">关闭直播</el-button>
                             <el-button class="custom-el-btn-color" plain @click="showEditor = true">代码编辑器</el-button>
                             <el-button class="custom-el-btn-color" plain @click="openDrawBroad">画板</el-button>
                         </div>
@@ -60,7 +62,7 @@
             <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
         <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="openShare">{{ !isShare ? '开启' : '关闭'
-        }}共享编辑</el-button>
+            }}共享编辑</el-button>
         <div class="editor-box">
             <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" />
         </div>
@@ -70,6 +72,7 @@
 
     </el-dialog>
 </template>
+
 <script setup>
 import MessageBubble from '../../components/messagebubble/index.vue'
 import Editor from '../../components/editor/index.vue'
@@ -157,7 +160,9 @@ onBeforeUnmount(() => {
     client.leave(roomId)
 })
 
+const isLive = ref(false)
 const startLive = async () => {
+    isLive.value = true
     if (sdk.value) {
         sdk.value.close()
     }
@@ -174,7 +179,8 @@ const startLive = async () => {
 }
 
 const closeLive = async () => {
-    if (sdk.value) {
+    isLive.value = false
+    if (sdk.value.pc) {
         sdk.value.close()
     }
 }
@@ -257,6 +263,7 @@ client.socket.on('currentUser', (data) => {
 })
 
 </script>
+
 <style lang='scss' scoped>
 .single-inner {
     margin-top: 30px;

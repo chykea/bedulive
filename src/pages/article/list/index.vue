@@ -1,0 +1,104 @@
+<template>
+    <section class="section latest-news-area blog-list">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-7 col-12">
+                    <div class="row">
+                        <Articlecard v-for="a in articleList" :key="a.id" :article="a" />
+                        <div class="pagination left blog-grid-page">
+                            <el-pagination :page-size="8" @current-change="handleCurrentChange" :pager-count="5"
+                                background layout="prev, pager, next" :total="total" />
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="col-lg-4 col-md-5 col-12">
+                    <div class="sidebar blog-grid-page">
+                        <div class="widget publish-widget">
+                            <router-link to="/article/publish">
+                                <button class="btn publish">发布文章</button>
+                            </router-link>
+                        </div>
+                        <div class="widget search-widget">
+                            <h5 class="widget-title"><span>搜索文章</span></h5>
+                            <form action="#">
+                                <input type="text" placeholder="输入关键字">
+                                <button type="submit"><i class="lni lni-search-alt"></i></button>
+                            </form>
+                        </div>
+
+
+                        <!-- Start Single Widget -->
+                        <!-- <div class="widget popular-tag-widget">
+                            <h5 class="widget-title"><span>分类</span></h5>
+                            <div class="tags">
+                                <a href="javascript:void(0)">Jobpress</a>
+                                <a href="javascript:void(0)">Design</a>
+                                <a href="javascript:void(0)">HR</a>
+                                <a href="javascript:void(0)">Recruiter</a>
+                                <a href="javascript:void(0)">Interview</a>
+                                <a href="javascript:void(0)">Employee</a>
+                                <a href="javascript:void(0)">Labor</a>
+                                <a href="javascript:void(0)">Salary</a>
+                                <a href="javascript:void(0)">Consult</a>
+                                <a href="javascript:void(0)">Business</a>
+                                <a href="javascript:void(0)">Candidates</a>
+                            </div>
+                        </div> -->
+                        <!-- End Single Widget -->
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</template>
+
+<script setup>
+import Articlecard from '../../../components/articlecard/index.vue'
+import { getAllArticle } from '../../../request/index'
+import { ref } from 'vue'
+const articleList = ref([])
+const page = ref(1)
+const total = ref(0)
+
+const getArticleList = async () => {
+    const { data } = await getAllArticle(page.value)
+    articleList.value = data.res.articles
+    articleList.value.map(item => {
+        // 摘要,通过内容截取20个字符
+        item.content = item.content.substring(0, 20)
+    })
+    total.value = data.res.total
+}
+// 获取文章列表
+getArticleList()
+
+const handleCurrentChange = async (val) => {
+    page.value = val
+    const { data } = await getAllArticle(val)
+    articleList.value = data.res.articles
+}
+
+</script>
+
+<style lang='scss' scoped>
+.publish {
+    display: inline-block;
+    text-transform: capitalize;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 15px 30px;
+    background-color: #5830E0;
+    color: #fff;
+    border: none;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    border-radius: 4px;
+}
+
+::v-deep {
+    .el-pagination.is-background .el-pager li.is-active {
+        background-color: #5830E0 !important;
+    }
+}
+</style>

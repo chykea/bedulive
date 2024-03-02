@@ -18,7 +18,8 @@
                             <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                                 <ul id="nav" class="navbar-nav ms-auto">
                                     <li class="nav-item">
-                                        <router-link to="/" active-class="active" class="dd-menu collapsed">首页</router-link>
+                                        <router-link to="/" active-class="active"
+                                            class="dd-menu collapsed">首页</router-link>
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
@@ -26,7 +27,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
-                                            to="/notes">笔记</router-link>
+                                            to="/article">文章</router-link>
                                     </li>
                                     <li class="nav-item">
                                         <router-link active-class="active" class="dd-menu collapsed"
@@ -67,6 +68,7 @@
         </div>
     </header>
 </template>
+
 <script setup>
 import { ref, onMounted, computed, watchEffect, watch } from "vue";
 import { useRootStore } from "../../store/index";
@@ -83,4 +85,5 @@ let firstName = computed(() => userInfo.value.nick_name.substring(0, 1))
 
 
 </script>
+
 <style lang="scss" scoped></style>

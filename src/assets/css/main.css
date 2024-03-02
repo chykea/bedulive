@@ -5474,7 +5474,7 @@ blockquote .shape {
 
 .my-items .single-item-list .item-image {
   position: relative;
-  padding-left: 80px;
+  /* padding-left: 80px; */
 }
 
 .my-items .single-item-list .item-image img {
