@@ -9,7 +9,7 @@
                 <h4 class="title"><router-link :to="'/article/detail?articleId=' + article.id">{{ article.title
                         }}</router-link></h4>
                 <!-- 摘要 -->
-                <p>{{ article.content }} </p>
+                <p>{{ article.digest }} </p>
                 <div class="meta-details">
                     <ul>
                         <li><a href="javascript:void(0)">{{ article.createdAt }}</a></li>

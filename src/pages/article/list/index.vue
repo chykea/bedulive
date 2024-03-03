@@ -64,10 +64,6 @@ const total = ref(0)
 const getArticleList = async () => {
     const { data } = await getAllArticle(page.value)
     articleList.value = data.res.articles
-    articleList.value.map(item => {
-        // 摘要,通过内容截取20个字符
-        item.content = item.content.substring(0, 20)
-    })
     total.value = data.res.total
 }
 // 获取文章列表

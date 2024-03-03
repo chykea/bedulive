@@ -38,9 +38,8 @@
                                     </li> -->
                                 </ul>
                                 <!-- 文章内容 -->
-                                <p>
-                                    {{ article.content }}
-                                </p>
+                                <div v-html="article.content" style="margin-top: 15px;">
+                                </div>
                             </div>
                             <!-- 评论 -->
                             <!-- <div class="post-comments">
