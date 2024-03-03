@@ -95,6 +95,10 @@ const unwatch = watch(() => props.html, (val) => {
         padding: 0 1rem;
     }
 
+    ol {
+        list-style: decimal;
+    }
+
     h1,
     h2,
     h3,

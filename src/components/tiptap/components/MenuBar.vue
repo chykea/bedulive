@@ -107,12 +107,12 @@ const items = reactive([
         action: () => props.editor.chain().focus().toggleOrderedList().run(),
         isActive: () => props.editor.isActive('orderedList')
     },
-    {
+    /* {
         icon: 'list-check-2',
         title: '任务列表',
         action: () => props.editor.chain().focus().toggleTaskList().run(),
         isActive: () => props.editor.isActive('taskList')
-    },
+    }, */
     {
         icon: 'code-box-line',
         title: '代码块',
