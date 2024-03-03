@@ -98,9 +98,7 @@ const deleteThis = async (id) => {
 </script>
 
 <style lang='scss' scoped>
-::v-deep {
-    .el-pagination.is-background .el-pager li.is-active {
-        background-color: #5830E0 !important;
-    }
+::v-deep(.el-pagination.is-background .el-pager li.is-active) {
+    background-color: #5830E0 !important;
 }
 </style>

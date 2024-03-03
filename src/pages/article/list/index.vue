@@ -96,9 +96,7 @@ const handleCurrentChange = async (val) => {
     border-radius: 4px;
 }
 
-::v-deep {
-    .el-pagination.is-background .el-pager li.is-active {
-        background-color: #5830E0 !important;
-    }
+::v-deep(.el-pagination.is-background .el-pager li.is-active) {
+    background-color: #5830E0 !important;
 }
 </style>
