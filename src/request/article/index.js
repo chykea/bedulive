@@ -26,7 +26,12 @@ function publishArticle(params) {
 function updateArticle(params) {
     return http.post(prefix + '/updateArticle', qs.stringify(params))
 }
+
+function addComment(params) {
+    return http.post(prefix + '/comment', qs.stringify(params))
+}
 export {
     getAllArticle, getArticle, getUserArticle,
-    deleteArticle, updateArticle, publishArticle
+    deleteArticle, updateArticle, publishArticle, // 文章相关
+    addComment // 
 }

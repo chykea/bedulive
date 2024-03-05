@@ -10,7 +10,6 @@ const getInfo = () => {
 }
 
 
-
 const debounce = (func, wait = 750, immediate) => {
     let timeout;
 

@@ -23,104 +23,37 @@
                                             {{ article.createdAt }}
                                         </a>
                                     </li>
-                                    <!-- 评论条数 -->
-                                    <!-- <li>
-                                        <a href="javascript:void(0)">
-                                            <i class="lni lni-comments"></i>
-                                            
-                                        </a>
-                                    </li> -->
-                                    <!-- <li>
-                                        <a href="javascript:void(0)">
-                                            <i class="lni lni-eye"></i>
-                                            55 View
-                                        </a>
-                                    </li> -->
+
                                 </ul>
                                 <!-- 文章内容 -->
                                 <div v-html="article.content" style="margin-top: 15px;">
                                 </div>
                             </div>
                             <!-- 评论 -->
-                            <!-- <div class="post-comments">
-                                <h3 class="comment-title"><span>3 comments on this post</span></h3>
+                            <div class="post-comments">
+                                <h3 class="comment-title"><span>{{ commentsRef.length }}条评论</span></h3>
                                 <ul class="comments-list">
-                                    <li>
-                                        <div class="comment-img">
-                                            <img src="assets/images/blog/comment1.jpg" class="rounded-circle" alt="img">
-                                        </div>
-                                        <div class="comment-desc">
-                                            <div class="desc-top">
-                                                <h6>Arista Williamson</h6>
-                                                <span class="date">19th May 2023</span>
-                                                <a href="javascript:void(0)" class="reply-link"><i
-                                                        class="lni lni-reply"></i>Reply</a>
-                                            </div>
-                                            <p>
-                                                Donec aliquam ex ut odio dictum, ut consequat leo interdum. Aenean nunc
-                                                ipsum, blandit eu enim sed, facilisis convallis orci. Etiam commodo
-                                                lectus
-                                                quis vulputate tincidunt. Mauris tristique velit eu magna maximus
-                                                condimentum.
-                                            </p>
-                                        </div>
-                                    </li>
-                                    <li class="children">
-                                        <div class="comment-img">
-                                            <img src="assets/images/blog/comment2.jpg" class="rounded-circle" alt="img">
-                                        </div>
-                                        <div class="comment-desc">
-                                            <div class="desc-top">
-                                                <h6>Rosalina Kelian <span class="saved"><i
-                                                            class="lni lni-bookmark"></i></span></h6>
-                                                <span class="date">15th May 2023</span>
-                                                <a href="javascript:void(0)" class="reply-link"><i
-                                                        class="lni lni-reply"></i>Reply</a>
-                                            </div>
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                                                tempor incididunt ut labore et dolore magna aliqua. Ut enim.
-                                            </p>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="comment-img">
-                                            <img src="assets/images/blog/comment3.jpg" class="rounded-circle" alt="img">
-                                        </div>
-                                        <div class="comment-desc">
-                                            <div class="desc-top">
-                                                <h6>Alex Jemmi</h6>
-                                                <span class="date">12th May 2023</span>
-                                                <a href="javascript:void(0)" class="reply-link"><i
-                                                        class="lni lni-reply"></i>Reply</a>
-                                            </div>
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                                                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-                                                veniam.
-                                            </p>
-                                        </div>
-                                    </li>
+                                    <Comment :comments="commentsRef" />
                                 </ul>
-                            </div> -->
+                            </div>
                             <!-- 发布评论 -->
                             <div class="comment-form">
                                 <h3 class="comment-reply-title"><span>留言</span></h3>
-                                <form action="#" method="POST">
+                                <el-form>
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="form-box form-group">
-                                                <textarea name="#" class="form-control form-control-custom"
+                                                <textarea v-model="contentRef" class="form-control form-control-custom"
                                                     placeholder="发？一条？友善的评论！"></textarea>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="button">
-                                                <button type="submit" class="btn">发表</button>
+                                                <button type="button" class="btn" @click="publishComment">发表</button>
                                             </div>
                                         </div>
                                     </div>
-                                </form>
+                                </el-form>
                             </div>
                         </div>
                     </div>
@@ -132,11 +65,6 @@
                             <div style="margin-top: 20px;">
                                 <span>{{ article.author }}</span>
                             </div>
-                            <!-- <h5 class="widget-title"><span>Search This Site</span></h5> -->
-                            <!-- <form action="#">
-                                <input type="text" placeholder="Search Here...">
-                                <button type="submit"><i class="lni lni-search-alt"></i></button>
-                            </form> -->
                         </div>
                     </div>
                 </aside>
@@ -157,16 +85,44 @@
 <script setup>
 import { ref } from 'vue';
 import { useRoute } from 'vue-router'
-import { getArticle } from '../../../request/index'
+import { getArticle, addComment } from '../../../request/index'
+import { ElMessage } from 'element-plus';
+import Comment from '../../../components/comments/index.vue'
 const route = useRoute()
 const id = route.query.articleId;
 const article = ref({})
+const commentsRef = ref([])
 
 const getArticleDetail = async () => {
     const { data } = await getArticle(id)
-    article.value = data.res
+    const { comments, ...res } = data.res
+
+    article.value = res
+    commentsRef.value = comments
+    // 用于控制评论的展开与收起
+    commentsRef.value.forEach(item => {
+        item['expanded'] = false
+    })
+
 }
 getArticleDetail()
+const contentRef = ref('')
+const publishComment = async () => {
+    const parentId = null, content = contentRef.value, articleId = id;
+    const { data } = await addComment({ parentId, content, articleId })
+    if (data.code == '0') {
+        ElMessage({
+            message: data.message,
+            type: 'success',
+            duration: 1000,
+            onClose: () => {
+                // 发布后刷新页面
+                location.reload()
+            }
+        })
+        contentRef.value = ''
+    }
+}
 </script>
 
 <style lang='scss' scoped>

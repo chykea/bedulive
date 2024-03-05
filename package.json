@@ -14,7 +14,7 @@
     "@tiptap/starter-kit": "^2.2.4",
     "@tiptap/vue-3": "^2.2.4",
     "axios": "^1.6.7",
-    "element-plus": "^2.5.3",
+    "element-plus": "^2.6.0",
     "fluent-ffmpeg": "^2.1.2",
     "flv.js": "^1.6.2",
     "monaco-editor": "^0.45.0",
