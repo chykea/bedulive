@@ -4,8 +4,19 @@
             <div class="row">
                 <div class="col-lg-8 col-md-7 col-12">
                     <div class="row">
-                        <Articlecard v-for="a in articleList" :key="a.id" :article="a" />
-                        <div class="pagination left blog-grid-page">
+                        <template v-if="articleList.length">
+                            <Articlecard v-for="a in articleList" :key="a.id" :article="a" />
+                        </template>
+
+                        <template v-else>
+                            <div class="col-12">
+                                <div class="alert " role="alert">
+                                    <h4 class="alert-heading">暂时没有查到文章哟~</h4>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div v-if="articleList.length" class="pagination left blog-grid-page">
                             <el-pagination :page-size="8" @current-change="handleCurrentChange" :pager-count="5"
                                 background layout="prev, pager, next" :total="total" />
                         </div>

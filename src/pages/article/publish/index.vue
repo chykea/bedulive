@@ -30,11 +30,19 @@
 </route>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import TipTap from '../../../components/tiptap/index.vue'
+// import TipTap from '../../../components/tiptap/index.vue'
 import { getArticle, updateArticle, publishArticle } from '../../../request/index'
 import { ElMessage } from 'element-plus';
+
+const TipTap = defineAsyncComponent({
+    loader: () => import('../../../components/tiptap/index.vue'),
+    loadingComponent: () => import('../../../components/loading/index.vue'),
+    errorComponent: () => import('../../../components/error/index.vue'),
+    delay: 200,
+    timeout: 10000
+})
 const router = useRouter()
 const tid = history.state.tid || ''
 const title = ref('')
