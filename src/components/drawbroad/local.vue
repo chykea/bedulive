@@ -24,6 +24,7 @@
                 </el-popover>
                 <el-popover placement="top" width="400" trigger="click" v-if="v.type === 'lineWidth'">
                     <el-slider v-model="lineWidth" :max=20 @change="lineWidthChange"></el-slider>
+
                     <template #reference>
                         <el-button class="custom-el-btn-color">{{ v.name }} <i>{{ lineWidth + 'px' }}</i></el-button>
                     </template>
@@ -32,6 +33,7 @@
         </ul>
     </div>
 </template>
+
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
 
@@ -59,7 +61,8 @@ const handleList = [
     { name: '前进', type: 'go' },
     { name: '清屏', type: 'clear' },
     { name: '线宽', type: 'lineWidth' },
-    { name: '颜色', type: 'color' }
+    { name: '颜色', type: 'color' },
+    { name: '保存绘画', type: 'download' }
 ]
 const allowCallback = (cancel, go) => {
     allowCancel.value = !cancel;
@@ -80,6 +83,8 @@ const moveCallback = (...arr) => {
 } */
 
 onMounted(() => {
+    drawbroad.value.width = document.querySelector('.drawbroad').clientWidth
+    drawbroad.value.height = document.querySelector('.drawbroad').clientHeight
     drawbroadInstance = new DrawBroad(drawbroad.value, {
         drawColor: color.value,
         drawType: currHandle.value,
@@ -87,10 +92,6 @@ onMounted(() => {
         allowCallback: allowCallback,
         moveCallback: moveCallback
     })
-
-    drawbroad.value.width = drawbroadInstance.width = document.querySelector('.drawbroad').clientWidth
-    drawbroad.value.height = drawbroadInstance.height = document.querySelector('.drawbroad').clientHeight
-
 })
 const sidesChange = (sides) => { // 改变多边形边数
     nextTick(() => {
@@ -108,16 +109,36 @@ const lineWidthChange = (lineWidth) => { // 改变线宽
     })
 }
 const handleClick = (v) => { // 操作按钮
-    if (['cancel', 'go', 'clear'].includes(v.type)) {
+    if (['cancel', 'go', 'clear'].includes(v.type)) { // 如果是取消，前进，清空
         moveCallback(v.type);
         drawbroadInstance[v.type]();
         return;
     }
+    if (['download'].includes(v.type)) {
+        download(drawbroadInstance.imgSrc)
+        return
+    }
     drawbroadInstance.changeWay({ type: v.type });
-    if (['color', 'lineWidth'].includes(v.type)) return;
+    if (['color', 'lineWidth'].includes(v.type)) return; // 如果是颜色和线宽，不需要改变按钮状态
     currHandle.value = v.type;
 }
+
+const download = (url) => {
+
+    // 创建一个 a 标签，并设置 href 和 download 属性
+    const el = document.createElement('a');
+    // 设置 href 为图片经过 base64 编码后的字符串，默认为 png 格式
+    el.href = url;
+    el.download = new Date().toLocaleDateString();
+
+
+    // 创建一个点击事件并对 a 标签进行触发
+    const event = new MouseEvent('click');
+    el.dispatchEvent(event);
+}
+
 </script>
+
 <style lang='scss' scoped>
 .drawbroad {
     background-color: #fff;

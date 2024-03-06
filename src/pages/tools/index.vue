@@ -9,8 +9,8 @@
                             <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                 <button class="nav-link" id="nav-grid-tab" title="编辑器" @click="component = 'Editor'"><i
                                         class="lni lni-grid-alt"></i></button>
-                                <button class="nav-link" id="nav-list-tab" title="画板" @click="component = 'DrawBroad'"><i
-                                        class="lni lni-list"></i></button>
+                                <button class="nav-link" id="nav-list-tab" title="画板"
+                                    @click="component = 'DrawBroad'"><i class="lni lni-list"></i></button>
                             </div>
                         </nav>
                     </div>
@@ -20,24 +20,40 @@
             <keep-alive>
                 <component :is="map.get(component)"></component>
             </keep-alive>
-            <!-- <Editor /> -->
-            <!-- <DrawBroad /> -->
-
+            <!-- <EditorAsync /> -->
         </div>
     </section>
 </template>
+
 <script setup>
 import Header from '../../components/header/index.vue'
-import Editor from '../../components/editor/index2.vue'
-import DrawBroad from '../../components/drawbroad/index2.vue'
-import { ref } from 'vue'
+// import Editor from '../../components/editor/local.vue'
+// import DrawBroad from '../../components/drawbroad/local.vue'
+import Loading from '../../components/loading/index.vue'
+import Error from '../../components/error/index.vue'
+import { ref, defineAsyncComponent } from 'vue'
 
+const EditorAsync = defineAsyncComponent({
+    loader: () => import('../../components/editor/local.vue'),
+    loadingComponent: Loading,
+    errorComponent: Error,
+    delay: 1000,
+    timeout: 20000
+})
+const DrawBroadAsync = defineAsyncComponent({
+    loader: () => import('../../components/drawbroad/local.vue'),
+    loadingComponent: Loading,
+    errorComponent: Error,
+    delay: 1000,
+    timeout: 20000
+})
 const map = new Map([
-    ['Editor', Editor],
-    ['DrawBroad', DrawBroad]
+    ['Editor', EditorAsync],
+    ['DrawBroad', DrawBroadAsync]
 ])
 const component = ref('Editor')
 </script>
+
 <style lang='scss' scoped>
 .tools-outer {
     background-color: #f9f9f9;
@@ -46,4 +62,4 @@ const component = ref('Editor')
 .tools {
     height: 690px;
 }
-</style>
+</style>../../components/editor/local.vue../../components/drawbroad/local.vue

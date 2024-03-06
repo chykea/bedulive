@@ -24,6 +24,7 @@
                 </el-popover>
                 <el-popover placement="top" width="400" trigger="click" v-if="v.type === 'lineWidth'">
                     <el-slider v-model="lineWidth" :max=20 @change="lineWidthChange"></el-slider>
+
                     <template #reference>
                         <el-button class="custom-el-btn-color">{{ v.name }} <i>{{ lineWidth + 'px' }}</i></el-button>
                     </template>
@@ -32,6 +33,7 @@
         </ul>
     </div>
 </template>
+
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -141,6 +143,7 @@ const handleClick = (v) => { // 操作按钮
     currHandle.value = v.type;
 }
 </script>
+
 <style lang='scss' scoped>
 .drawbroad-operation {
 
