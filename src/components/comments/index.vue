@@ -12,6 +12,8 @@
             </p>
             <span class="date">{{ comment.createdAt }}</span>&nbsp;
             <a href="javascript:void(0)" class="reply-link" @click="showReply(comment.id)">回复</a>
+            &nbsp;
+            <a href="javascript:void(0)" class="reply-link" @click="deleteReply(comment.id)">删除</a>
         </div>
         <div v-if="comment.replies.length" style="margin-top: 15px;">
             <span>共有{{ comment.replies.length }}条回复</span>&nbsp;
@@ -40,7 +42,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Reply from './components/reply.vue'
-import { addComment } from '../../request/index'
+import { addComment, deleteComment } from '../../request/index'
 const route = useRoute()
 const props = defineProps({
     comments: {
@@ -66,7 +68,7 @@ const showReply = async (parentId) => {
     locationID.value = '#' + prefix + parentId
     id = parentId
 }
-
+// 回复
 const handleReply = async () => {
     const parentId = id;
     if (!replyContent.value) {
@@ -98,6 +100,42 @@ const handleReply = async () => {
         duration: 1000
     })
 
+}
+// 删除
+const deleteReply = async (commentId) => {
+    try {
+        const res = await ElMessageBox.confirm(
+            '删除评论操作不可逆！是否继续',
+            'Warning',
+            {
+                confirmButtonText: '确认',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }
+        )
+        if (res === 'confirm') {
+            const { data } = await deleteComment(commentId)
+            if (data.code == '0') {
+                ElMessage({
+                    message: '删除成功',
+                    type: 'success',
+                    duration: 1000
+                })
+                location.reload()
+                return
+            }
+            ElMessage({
+                message: '删除失败',
+                type: 'error',
+                duration: 1000
+            })
+        }
+    } catch (e) {
+        ElMessage({
+            type: 'info',
+            message: '取消删除',
+        })
+    }
 }
 
 </script>

@@ -12,6 +12,8 @@
             </p>
             <span class="date">{{ reply.createdAt }}</span>&nbsp;
             <a href="javascript:void(0)" @click="showReply(reply.id)">回复</a>
+            &nbsp;
+            <a href="javascript:void(0)" @click="deleteReply(reply.id)">删除</a>
         </div>
         <div :id="prefix + reply.id"></div>
     </div>
@@ -32,7 +34,7 @@
 <script setup>
 import { ref } from 'vue'
 import Reply from './reply.vue'
-import { addComment } from '../../../request/index'
+import { addComment, deleteComment } from '../../../request/index'
 const props = defineProps({
     parentReply: {
         type: Object,
@@ -98,6 +100,42 @@ const handleReply = async () => {
         type: 'error',
         duration: 1000
     })
+}
+
+const deleteReply = async (commentId) => {
+    try {
+        const res = await ElMessageBox.confirm(
+            '删除评论操作不可逆！是否继续',
+            'Warning',
+            {
+                confirmButtonText: '确认',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }
+        )
+        if (res === 'confirm') {
+            const { data } = await deleteComment(commentId)
+            if (data.code == '0') {
+                ElMessage({
+                    message: '删除成功',
+                    type: 'success',
+                    duration: 1000
+                })
+                location.reload()
+                return
+            }
+            ElMessage({
+                message: '删除失败',
+                type: 'error',
+                duration: 1000
+            })
+        }
+    } catch (e) {
+        ElMessage({
+            type: 'info',
+            message: '删除取消',
+        })
+    }
 }
 </script>
 
