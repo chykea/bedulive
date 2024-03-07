@@ -69,6 +69,7 @@ import { ElMessage } from 'element-plus';
 import Articlecard from '../../../components/articlecard/index.vue'
 import { getAllArticle, searchArticle } from '../../../request/index'
 import { ref } from 'vue'
+import { debounce } from '../../../utils/util';
 const articleList = ref([])
 const page = ref(1)
 const total = ref(0)
@@ -97,8 +98,7 @@ const handleCurrentChange = async (val) => {
 }
 
 const keyword = ref('')
-const search = async () => {
-    // if (keyword.value === '') return
+const search = debounce(async () => {
     page.value = 1
     const params = {
         page: page.value,
@@ -115,7 +115,7 @@ const search = async () => {
     }
     articleList.value = data.res.articles
     total.value = data.res.total
-}
+})
 
 </script>
 
