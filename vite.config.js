@@ -19,10 +19,10 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
 
     server: {
       host: '0.0.0.0', // 允许外部访问
-      https: {
-        key: fs.readFileSync('./cert/localhost+1-key.pem'),
-        cert: fs.readFileSync('./cert/localhost+1.pem'),
-      }, // 启用https
+      // https: {
+      //   key: fs.readFileSync('./cert/localhost+1-key.pem'),
+      //   cert: fs.readFileSync('./cert/localhost+1.pem'),
+      // }, // 启用https
       port: 3000,  // 指定端口号
     },
     plugins: [

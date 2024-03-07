@@ -1318,10 +1318,13 @@ ol {
 .header .user-button ul {
   padding: 14px 20px;
   border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .header .user-button ul li {
-  display: inline-block;
+  /* display: inline-block; */
   margin-right: 10px;
   padding-right: 10px;
   border-right: 1px solid #eee;
@@ -4948,18 +4951,9 @@ blockquote .shape {
   position: relative;
   padding: 30px 100px;
   border-bottom: 1px solid #eee;
-  /* padding-left: 100px; */
   padding-bottom: 40px;
 }
 
-.dashboard-sidebar .user-image img {
-  height: 50px;
-  width: 50px;
-  border-radius: 3px;
-  position: absolute;
-  left: 30px;
-  top: 30px;
-}
 
 .dashboard-sidebar .user-image h3 {
   font-size: 15px;

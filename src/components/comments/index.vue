@@ -1,7 +1,7 @@
 <template>
   <li v-for="comment in comments" :key="comment.id">
     <div class="comment-img">
-      <el-avatar :size="100">{{ comment.user.nick_name }}</el-avatar>
+      <el-avatar :size="100" :src="comment.user.avatar_url"></el-avatar>
     </div>
     <div class="comment-desc">
       <div class="desc-top">
@@ -10,25 +10,15 @@
       <p style="margin-bottom: 15px">
         {{ comment.content }}
       </p>
-      <span class="date">{{ comment.createdAt }}</span
-      >&nbsp;
-      <a href="javascript:void(0)" class="reply-link" @click="showReply(comment.id)"
-        >回复</a
-      >
+      <span class="date">{{ comment.createdAt }}</span>&nbsp;
+      <a href="javascript:void(0)" class="reply-link" @click="showReply(comment.id)">回复</a>
       &nbsp;
-      <a
-        href="javascript:void(0)"
-        v-if="comment.user.uid === store.userInfo.uid || store.userInfo.identity === '0'"
-        class="reply-link"
-        @click="deleteReply(comment.id)"
-        >删除</a
-      >
+      <a href="javascript:void(0)" v-if="comment.user.uid === store.userInfo.uid || store.userInfo.identity === '0'"
+        class="reply-link" @click="deleteReply(comment.id)">删除</a>
     </div>
     <div v-if="comment.replies.length" style="margin-top: 15px">
       <span>共有{{ comment.replies.length }}条回复</span>&nbsp;
-      <a href="javascript:void(0)" class="reply-link" @click="comment.expanded = true"
-        >查看回复</a
-      >
+      <a href="javascript:void(0)" class="reply-link" @click="comment.expanded = true">查看回复</a>
     </div>
     <div :id="prefix + comment.id"></div>
     <template v-if="comment.replies.length">
@@ -39,11 +29,7 @@
   </li>
   <Teleport v-if="locationID !== 'body'" :to="locationID">
     <div>
-      <el-input
-        v-model="replyContent"
-        style="height: 50px"
-        placeholder="请输入内容哟"
-      ></el-input>
+      <el-input v-model="replyContent" style="height: 50px" placeholder="请输入内容哟"></el-input>
       <div style="margin-top: 10px; text-align: right">
         <el-button class="btn" @click="handleReply">回复</el-button>
       </div>

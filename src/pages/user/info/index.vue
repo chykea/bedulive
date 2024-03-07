@@ -8,9 +8,7 @@
 
                     <div class="dashboard-sidebar">
                         <div class="user-image">
-                            <el-avatar :size="100">
-                                {{ user.nick_name }}
-                            </el-avatar>
+                            <el-avatar :size="100" :src="user.avatar_url" />
                             <h3 style="display:inline-block;">{{ user.nick_name }}
                                 <span><a href="javascript:void(0)">@{{ user.user_name }}</a></span>
                             </h3>
@@ -70,7 +68,9 @@ const map = new Map([
 ])
 
 watchEffect(() => {
+
     user.value = store.userInfo
+    console.log(user.value);
 })
 
 

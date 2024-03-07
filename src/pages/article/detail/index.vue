@@ -62,7 +62,7 @@
                     <div class="sidebar blog-grid-page">
                         <div class="widget search-widget user">
                             <!-- 由于async/await影响，在数据没有加载完时控制台会报错 -->
-                            <el-avatar :size="100">{{ article.user && article.user.nick_name }}</el-avatar>
+                            <el-avatar :size="100" :src='article.user && article.user.avatar_url'></el-avatar>
                             <div style="margin-top: 20px;">
                                 <span>{{ article.user && article.user.nick_name }}</span>
                             </div>

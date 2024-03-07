@@ -3,6 +3,21 @@
         <div class="dashboard-block mt-0 profile-settings-block">
             <h3 class="block-title">编辑个人资料</h3>
             <div class="inner-block">
+                <div class="row">
+                    <div class="form-group">
+                        <label>头像*</label>
+                    </div>
+                    <div class="upload-img">
+                        <el-upload class="avatar-uploader" :http-request="uploadImage" :show-file-list="false"
+                            accept="image/jpeg,image/png" :on-success="handleAvatarSuccess"
+                            :before-upload="beforeAvatarUpload">
+                            <img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
+                            <el-icon v-else class="avatar-uploader-icon">
+                                <Plus />
+                            </el-icon>
+                        </el-upload>
+                    </div>
+                </div>
                 <el-form :model="info" class="profile-setting-form" :rules="rules2" ref="infoFormRef">
                     <div class="row">
                         <div class="col-lg-6 col-12">
@@ -23,7 +38,9 @@
                         </div>
                     </div>
                 </el-form>
+
             </div>
+
         </div>
         <div class="dashboard-block password-change-block">
             <h3 class="block-title">更新密码</h3>
@@ -75,7 +92,7 @@
 
 <script setup>
 import { reactive, ref } from "vue";
-import { changePassword, changeInfo } from '../../request/index'
+import { changePassword, changeInfo, uploadAvatar } from '../../request/index'
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useRootStore } from '../../store/index'
@@ -131,7 +148,7 @@ const rules = {
         trigger: 'blur'
     }]
 }
-// 2
+
 const rules2 = {
     nick_name: [{
         required: true,
@@ -193,6 +210,62 @@ const changeUserInfo = (formEle) => {
     })
 
 }
+
+const avatarUrl = ref('')
+
+const beforeAvatarUpload = () => {
+
+}
+const uploadImage = async (params) => {
+    const file = params.file;
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await uploadAvatar(formData)
+    if (data.result) {
+        avatarUrl.value = data.result.avatar
+        store.userInfo.avatar_url = data.result.avatar
+    }
+}
+const handleAvatarSuccess = (res, file) => {
+
+}
 </script>
 
-<style lang='scss' scoped></style>
+<style lang='scss' scoped>
+.upload-img {
+    display: inline-block;
+    width: 178px;
+    height: 178px;
+}
+
+:v-deep {
+    .avatar-uploader .avatar {
+        width: 178px;
+        height: 178px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .avatar-uploader .el-upload {
+        border: 1px dashed var(--el-border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: var(--el-transition-duration-fast);
+    }
+
+    .avatar-uploader .el-upload:hover {
+        border-color: var(--el-color-primary);
+    }
+
+    .el-icon.avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 178px;
+        height: 178px;
+        text-align: center;
+    }
+}
+</style>
+<style></style>

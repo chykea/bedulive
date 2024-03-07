@@ -17,9 +17,15 @@ function changePassword(params) {
 function changeInfo(params) {
     return http.post(prefix + '/changeInfo', qs.stringify(params))
 }
+
+// 上传头像
+function uploadAvatar(params) {
+    return http.post(prefix + '/uploadAvatar', params, { headers: { 'Content-Type': 'multipart/form-data' } })
+}
 export {
     login,
     register,
     changePassword,
-    changeInfo
+    changeInfo,
+    uploadAvatar
 }

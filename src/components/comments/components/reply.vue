@@ -1,7 +1,7 @@
 <template>
   <div class="reply">
     <div class="reply-img">
-      <el-avatar :size="50">{{ reply.user.nick_name.substring(0, 1) }}</el-avatar>
+      <el-avatar :size="50" :src="reply.user.avatar_url"></el-avatar>
     </div>
     <div class="reply-desc">
       <div class="desc-top">
@@ -9,41 +9,27 @@
       </div>
       <p>
         {{
-          parentReply
-            ? `回复 @${parentReply.user.nick_name} :` + reply.content
-            : reply.content
-        }}
+        parentReply
+          ? `回复 @${parentReply.user.nick_name} :` + reply.content
+          : reply.content
+      }}
       </p>
-      <span class="date">{{ reply.createdAt }}</span
-      >&nbsp;
+      <span class="date">{{ reply.createdAt }}</span>&nbsp;
       <a href="javascript:void(0)" @click="showReply(reply.id)">回复</a>
       &nbsp;
-      <a
-        href="javascript:void(0)"
-        v-if="reply.user.uid === store.userInfo.uid || store.userInfo.identity === '0'"
-        @click="deleteReply(reply.id)"
-        >删除
+      <a href="javascript:void(0)" v-if="reply.user.uid === store.userInfo.uid || store.userInfo.identity === '0'"
+        @click="deleteReply(reply.id)">删除
       </a>
     </div>
     <div :id="prefix + reply.id"></div>
   </div>
   <template v-if="reply.replies.length">
-    <Reply
-      v-for="item in reply.replies"
-      :key="item.id"
-      :reply="item"
-      :parentReply="reply"
-      :articleId="articleId"
-    >
+    <Reply v-for="item in reply.replies" :key="item.id" :reply="item" :parentReply="reply" :articleId="articleId">
     </Reply>
   </template>
   <Teleport v-if="locationID !== 'body'" :to="locationID">
     <div>
-      <el-input
-        v-model="replyContent"
-        style="height: 50px"
-        placeholder="请输入内容哟"
-      ></el-input>
+      <el-input v-model="replyContent" style="height: 50px" placeholder="请输入内容哟"></el-input>
       <div style="text-align: right; margin-top: 10px">
         <el-button class="btn" @click="handleReply">回复</el-button>
       </div>

@@ -48,12 +48,10 @@
                             </div>
                             <div class="user-button" v-else>
                                 <ul>
-                                    <router-link to="/user/info">
-                                        <li><el-avatar> {{ firstName }} </el-avatar></li>
-                                        <li>
-                                            <a href="javascript:void(0)">{{ userInfo.nick_name }}</a>
-                                        </li>
-                                    </router-link>
+                                    <li><el-avatar :src="userInfo.avatar_url"> </el-avatar></li>
+                                    <li>
+                                        <router-link to="/user/info">{{ userInfo.nick_name }}</router-link>
+                                    </li>
                                 </ul>
 
                             </div>
