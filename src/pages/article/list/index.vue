@@ -94,6 +94,7 @@ const handleCurrentChange = async (val) => {
         return
     }
     articleList.value = data.res.articles
+
     total.value = data.res.total
 }
 

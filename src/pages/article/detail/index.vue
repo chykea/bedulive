@@ -61,9 +61,13 @@
                 <aside class="col-lg-4 col-md-12 col-12">
                     <div class="sidebar blog-grid-page">
                         <div class="widget search-widget user">
-                            <el-avatar :size="100">{{ article.author }}</el-avatar>
+                            <!-- 由于async/await影响，在数据没有加载完时控制台会报错 -->
+                            <el-avatar :size="100">{{ article.user && article.user.nick_name }}</el-avatar>
                             <div style="margin-top: 20px;">
-                                <span>{{ article.author }}</span>
+                                <span>{{ article.user && article.user.nick_name }}</span>
+                            </div>
+                            <div>
+                                <a href="javascript:void(0)">@{{ article.user && article.user.user_name }}</a>
                             </div>
                         </div>
                     </div>
@@ -96,7 +100,6 @@ const commentsRef = ref([])
 const getArticleDetail = async () => {
     const { data } = await getArticle(id)
     const { comments, ...res } = data.res
-
     article.value = res
     commentsRef.value = comments
     // 用于控制评论的展开与收起

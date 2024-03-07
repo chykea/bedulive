@@ -16,7 +16,8 @@
                 <div class="meta-details">
                     <ul>
                         <li><a href="javascript:void(0)">{{ article.createdAt }}</a></li>
-                        <li><a href="javascript:void(0)">{{ article.author }}</a></li>
+                        <li><a href="javascript:void(0)">{{ article.user.nick_name }}</a></li>
+                        <li><a href="javascript:void(0)">{{ article.commentCount }}条评论</a></li>
                         <!-- <li><a href="javascript:void(0)">Technology</a></li> -->
                     </ul>
                 </div>
