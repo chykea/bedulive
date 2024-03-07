@@ -9,7 +9,7 @@
               <div class="detail-inner">
                 <h2 class="post-title" v-show="!isUpdate">{{ roomInfo.title }}</h2>
                 <el-input v-model="roomInfo.title" v-show="isUpdate"></el-input>
-                <span style="vertical-align: middle">当前老师:{{ roomInfo.nick_name }}</span>
+                <span style="vertical-align: middle">当前老师:{{ roomInfo.user && roomInfo.user.nick_name }}</span>
                 <el-button v-if="identity !== '1' && roomId == userInfo.uid" plain style="margin-left: 10px"
                   class="custom-el-btn-color" @click="updateRoomInfo">{{ isUpdate ? "确认" : "修改标题" }}</el-button>
                 <p><span>当前在线人数:</span>{{ currentUser }}</p>
@@ -74,8 +74,6 @@
 
 <script setup>
 import MessageBubble from "../../components/messagebubble/index.vue";
-// import Editor from '../../components/editor/index.vue'
-// import DrawBroad from '../../components/drawbroad/index.vue'
 import { onMounted, ref, watch, defineAsyncComponent } from "vue";
 import { useRoute } from "vue-router";
 import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom } from "../../request";
@@ -141,21 +139,24 @@ const showVideoMark = ref(false);
 onMounted(async () => {
   const { data } = await getLiveRoom(roomId);
   roomInfo.value = data.res;
-
   // 不是主播就进行拉流
   if (roomId !== userInfo.uid) {
     showVideoMark.value = false;
     if (sdk.value) {
       sdk.value.close();
     }
+
     sdk.value = new SrsRtcPlayerAsync();
 
     const { data: { result } } = await getPlayerURL(roomId);
+    sdk.value.play(result.stream_url).then(() => {
+      document.getElementById("screen").srcObject = sdk.value.screen;
+    }).catch((err) => {
+      console.log(1);
+      showVideoMark.value = true;
 
-    sdk.value.play(result.stream_url)
+    })
 
-    document.getElementById("screen").srcObject = sdk.value.screen;
-    // console.log(document.getElementById("screen").srcObject);
   }
   client.join({
     user: userInfo,
@@ -173,15 +174,16 @@ onMounted(async () => {
   });
 });
 
+// 刷新
 const reload = async () => {
   if (sdk.value) {
     showVideoMark.value = false;
     const { data: { result } } = await getPlayerURL(roomId);
-
-    sdk.value.play(result.stream_url);
-    console.log(document.getElementById("screen").srcObject);
-    document.getElementById("screen").srcObject = sdk.value.screen;
-
+    sdk.value.play(result.stream_url).then(() => {
+      document.getElementById("screen").srcObject = sdk.value.screen;
+    }).catch((err) => {
+      showVideoMark.value = true
+    })
   }
 };
 

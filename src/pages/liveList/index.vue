@@ -16,16 +16,13 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-12">
-                                                <div class="pagination left">
-                                                    <ul class="pagination-list">
-                                                        <li><a href="javascript:void(0)">1</a></li>
-                                                        <li class="active"><a href="javascript:void(0)">2</a></li>
-                                                        <li><a href="javascript:void(0)">3</a></li>
-                                                        <li><a href="javascript:void(0)">4</a></li>
-                                                        <li><a href="javascript:void(0)"><i
-                                                                    class="lni lni-chevron-right"></i></a></li>
-                                                    </ul>
-                                                </div>
+
+                                                <!-- <div v-if="articleList.length" class="pagination left ">
+                                                    <el-pagination :page-size="8" @current-change="handleCurrentChange"
+                                                        :pager-count="5" background layout="prev, pager, next"
+                                                        :total="total" />
+                                                </div> -->
+
                                             </div>
                                         </div>
                                     </div>
@@ -54,6 +51,8 @@ const liveList = reactive([])
 onMounted(async () => {
     const { data } = await getLiveList()
     liveList.push(...data.res)
+    console.log(liveList);
 })
+
 </script>
 <style lang='scss' scoped></style>
