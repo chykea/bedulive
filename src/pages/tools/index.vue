@@ -27,24 +27,20 @@
 
 <script setup>
 import Header from '../../components/header/index.vue'
-// import Editor from '../../components/editor/local.vue'
-// import DrawBroad from '../../components/drawbroad/local.vue'
-import Loading from '../../components/loading/index.vue'
-import Error from '../../components/error/index.vue'
 import { ref, defineAsyncComponent } from 'vue'
 
 const EditorAsync = defineAsyncComponent({
     loader: () => import('../../components/editor/local.vue'),
-    loadingComponent: Loading,
-    errorComponent: Error,
-    delay: 1000,
+    loadingComponent: () => import('../../components/loading/index.vue'),
+    errorComponent: () => import('../../components/error/index.vue'),
+    delay: 10000,
     timeout: 20000
 })
 const DrawBroadAsync = defineAsyncComponent({
     loader: () => import('../../components/drawbroad/local.vue'),
-    loadingComponent: Loading,
-    errorComponent: Error,
-    delay: 1000,
+    loadingComponent: () => import('../../components/loading/index.vue'),
+    errorComponent: () => import('../../components/error/index.vue'),
+    delay: 10000,
     timeout: 20000
 })
 const map = new Map([
@@ -62,4 +58,4 @@ const component = ref('Editor')
 .tools {
     height: 690px;
 }
-</style>../../components/editor/local.vue../../components/drawbroad/local.vue
+</style>

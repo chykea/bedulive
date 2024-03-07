@@ -16,9 +16,27 @@
         </template>
     </el-popover>
     <el-button @click="changeMinimap" class="custom-el-btn-color" plain>minimap</el-button>
+    <el-button @click="showImport = true" class="custom-el-btn-color" plain>导入</el-button>
+    <el-button @click="exportFile" class="custom-el-btn-color" plain>导出</el-button>
+
     <div id="codeEditBox"></div>
+    <el-dialog v-model="showImport">
+        <el-upload class="upload-demo" :show-file-list="false" :auto-upload="false" :on-change="importFile" drag
+            accept=".js,text/html,.css,.ts,.json">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">
+                拖拽文件到这里 <em>点击上传</em>
+            </div>
+
+            <template #tip>
+                <div class="el-upload__tip">
+                    只能上传html/css/js/json文件
+                </div>
+            </template>
+        </el-upload>
+    </el-dialog>
 </template>
-  
+
 
 <script setup>
 // 个人版编辑器
@@ -30,6 +48,7 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
 import { nextTick, ref, onBeforeUnmount, } from 'vue'
 import { debounce } from '../../utils/util'
+import { ElMessage } from 'element-plus'
 
 const language = ref('javascript')
 const theme = ref('vs')
@@ -58,6 +77,8 @@ const languageOptions = [
         label: 'json',
     },
 ]
+
+
 const themeOptions = [
     {
         value: 'vs',
@@ -132,7 +153,6 @@ const editorInit = () => {
     })
 }
 editorInit()
-
 const historyMap = new Map()
 const changeLanguage = (language) => {
     // 存储当前语言编辑的代码
@@ -155,13 +175,83 @@ const changeMinimap = () => {
     })
 }
 
+// 导出代码
+const getExtensionFromLanguage = (extension) => {
+    switch (extension) {
+        case 'javascript':
+            return 'js';
+        case 'typescript':
+            return 'ts'
+        case 'html':
+            return 'html';
+        case 'css':
+            return 'css';
+        case 'json':
+            return 'json';
+        default:
+            return 'plaintext'; // 默认设置为纯文本
+    }
+}
+const showImport = ref(false);
 
+const exportFile = () => {
+    if (code.value === '') {
+        ElMessage({
+            message: '没有可导出的内容',
+            type: 'warning',
+            duration: 1000
+        })
+        return
+    }
+    var blob = new Blob([code.value], { type: 'text/plain' });
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'code.' + getExtensionFromLanguage(language.value); // 文件名为 code.语言后缀
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
 
+// 导入代码
+const importFile = (file) => {
+    var postfix = getFileExtension(file.name);
+    if (!['html', 'css', 'js', 'json'].includes(getFileExtension(postfix))) {
+        ElMessage({
+            message: '不支持的文件格式',
+            type: 'error',
+            duration: 1000
+        })
+        return
+    }
+    const reader = new FileReader();
+    reader.readAsText(file.raw, 'gbk');
+    reader.onload = (e) => {
+        editor.setValue(e.target.result)
+        monaco.editor.setModelLanguage(editor.getModel(), getLanguageFromExtension(postfix))
+        language.value = getLanguageFromExtension(postfix);
+        showImport.value = false;
+    }
+}
 
+const getFileExtension = (filename) => filename.split('.').pop().toLowerCase();
+const getLanguageFromExtension = (extension) => {
+    switch (extension) {
+        case 'js':
+            return 'javascript';
+        case 'html':
+            return 'html';
+        case 'css':
+            return 'css';
+        case 'json':
+            return 'json';
+        default:
+            return 'plaintext'; // 默认设置为纯文本
+    }
+}
 
 
 </script>
-  
+
 <style scoped>
 #codeEditBox {
     height: 100%;
