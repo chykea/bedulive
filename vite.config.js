@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import basicSSL from '@vitejs/plugin-basic-ssl'
+// import basicSSL from '@vitejs/plugin-basic-ssl'
 
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
@@ -8,6 +8,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 import VueRouter from 'unplugin-vue-router/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
+import fs from 'fs'
 
 
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -18,7 +19,10 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
 
     server: {
       host: '0.0.0.0', // 允许外部访问
-      https: true, // 启用https
+      https: {
+        key: fs.readFileSync('./cert/localhost+1-key.pem'),
+        cert: fs.readFileSync('./cert/localhost+1.pem'),
+      }, // 启用https
       port: 3000,  // 指定端口号
     },
     plugins: [
@@ -33,7 +37,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       }),
 
       vue(),
-      basicSSL(), // 本地服务开启https的自签名证书
+      // basicSSL(), // 本地服务开启https的自签名证书
       // ele 自动导入
       AutoImport({
         resolvers: [ElementPlusResolver()],

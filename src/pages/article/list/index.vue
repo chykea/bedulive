@@ -16,7 +16,7 @@
                             </div>
                         </template>
 
-                        <div v-if="articleList.length" class="pagination left blog-grid-page">
+                        <div v-if="articleList.length" class="pagination left ">
                             <el-pagination :page-size="8" @current-change="handleCurrentChange" :pager-count="5"
                                 background layout="prev, pager, next" :total="total" />
                         </div>
@@ -32,10 +32,10 @@
                         </div>
                         <div class="widget search-widget">
                             <h5 class="widget-title"><span>搜索文章</span></h5>
-                            <form action="#">
-                                <input type="text" placeholder="输入关键字">
-                                <button type="submit"><i class="lni lni-search-alt"></i></button>
-                            </form>
+                            <el-form>
+                                <input v-model="keyword" type="text" placeholder="输入关键字">
+                                <button type="button" @click="search"><i class="lni lni-search-alt"></i></button>
+                            </el-form>
                         </div>
 
 
@@ -65,8 +65,9 @@
 </template>
 
 <script setup>
+import { ElMessage } from 'element-plus';
 import Articlecard from '../../../components/articlecard/index.vue'
-import { getAllArticle } from '../../../request/index'
+import { getAllArticle, searchArticle } from '../../../request/index'
 import { ref } from 'vue'
 const articleList = ref([])
 const page = ref(1)
@@ -83,7 +84,37 @@ getArticleList()
 const handleCurrentChange = async (val) => {
     page.value = val
     const { data } = await getAllArticle(val)
+    if (data.code === '1') {
+        ElMessage({
+            message: '加载文章失败',
+            type: 'error',
+            duration: 1000
+        })
+        return
+    }
     articleList.value = data.res.articles
+    total.value = data.res.total
+}
+
+const keyword = ref('')
+const search = async () => {
+    // if (keyword.value === '') return
+    page.value = 1
+    const params = {
+        page: page.value,
+        keyword: keyword.value
+    }
+    const { data } = await searchArticle(params)
+    if (data.code === '1') {
+        ElMessage({
+            message: '搜索文章失败',
+            type: 'error',
+            duration: 1000
+        })
+        return
+    }
+    articleList.value = data.res.articles
+    total.value = data.res.total
 }
 
 </script>
@@ -102,6 +133,10 @@ const handleCurrentChange = async (val) => {
     transition: 0.5s;
     border-radius: 4px;
 }
+
+// .pagination {
+//     height: 32px;
+// }
 
 ::v-deep(.el-pagination.is-background .el-pager li.is-active) {
     background-color: #5830E0 !important;

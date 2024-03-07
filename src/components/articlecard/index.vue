@@ -6,8 +6,11 @@
                 <a href="blog-single-sidebar.html"><img class="thumb" src="assets/images/blog/blog1.jpg" alt="#"></a>
             </div> -->
             <div class="content-body">
-                <h4 class="title"><router-link :to="'/article/detail?articleId=' + article.id">{{ article.title
-                        }}</router-link></h4>
+                <h4 class="title">
+                    <router-link :to="'/article/detail?articleId=' + article.id">
+                        {{ article.title }}
+                    </router-link>
+                </h4>
                 <!-- 摘要 -->
                 <p>{{ article.digest }} </p>
                 <div class="meta-details">
@@ -28,4 +31,11 @@ const props = defineProps({
 })
 </script>
 
-<style lang='scss' scoped></style>
+<style lang='scss' scoped>
+.title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+}
+</style>

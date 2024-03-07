@@ -40,7 +40,7 @@ const TipTap = defineAsyncComponent({
     loader: () => import('../../../components/tiptap/index.vue'),
     loadingComponent: () => import('../../../components/loading/index.vue'),
     errorComponent: () => import('../../../components/error/index.vue'),
-    delay: 200,
+    delay: 2000,
     timeout: 10000
 })
 const router = useRouter()

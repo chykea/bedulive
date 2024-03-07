@@ -26,6 +26,10 @@ function publishArticle(params) {
 function updateArticle(params) {
     return http.post(prefix + '/updateArticle', qs.stringify(params))
 }
+
+function searchArticle(params) {
+    return http.post(prefix + '/searchArticle', qs.stringify(params))
+}
 // 发布/回复评论
 function addComment(params) {
     return http.post(prefix + '/comment', qs.stringify(params))
@@ -35,8 +39,9 @@ function addComment(params) {
 function deleteComment(params) {
     return http.get(prefix + '/delete?' + "commentId=" + params)
 }
+
 export {
     getAllArticle, getArticle, getUserArticle,
     deleteArticle, updateArticle, publishArticle, // 文章相关
-    addComment, deleteComment // 
+    addComment, deleteComment, searchArticle// 
 }

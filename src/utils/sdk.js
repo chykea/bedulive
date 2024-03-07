@@ -18,17 +18,13 @@ function SrsRtcPublishAsync() {
         video: true
 
     }
-    var cemareConstraint = {
-        video: true,
-        audio: true
-    }
+
     var soundsConstraint = {
         // video: true,
         audio: true
     }
     self.pc = new RTCPeerConnection(null);
 
-    self.camera = new MediaStream();
     self.screen = new MediaStream();
     self.audio = new MediaStream();
 
@@ -38,20 +34,6 @@ function SrsRtcPublishAsync() {
     };
 
 
-
-    /* self.openCemare = async function () {
-        if (self.camera.getTracks().length) return
-        // 摄像头
-        var stream = await navigator.mediaDevices.getUserMedia(cemareConstraint);
-
-        stream.getTracks().forEach(function (track) {
-            // 然后添加到RTCPeerConnection中(传输)
-            // self.pc.addTrack(track);
-            // 把每个轨道放到self.stream中(本地显示)
-            self.camera.addTrack(track);
-            self.pc.addTrack(track, self.camera)
-        });
-    } */
     self.openScreen = async function () {
         if (self.screen.getTracks().length) return
 
@@ -133,7 +115,6 @@ function SrsRtcPublishAsync() {
             //
             var urlObject = self.__internal.parse(webrtcUrl);
 
-            // If user specifies the schema, use it as API schema.
             var schema = urlObject.user_query.schema;
             schema = schema ? schema + ':' : window.location.protocol;
 
@@ -142,7 +123,6 @@ function SrsRtcPublishAsync() {
                 port = urlObject.port || 443;
             }
 
-            // @see https://github.com/rtcdn/rtcdn-draft
             var api = urlObject.user_query.play || self.__internal.defaultPath;
             if (api.lastIndexOf('/') !== api.length - 1) {
                 api += '/';
@@ -154,7 +134,6 @@ function SrsRtcPublishAsync() {
                     apiUrl += '&' + key + '=' + urlObject.user_query[key];
                 }
             }
-            // Replace /rtc/v1/play/&k=v to /rtc/v1/play/?k=v
             var apiUrl = apiUrl.replace(api + '&', api + '?');
 
             var streamUrl = urlObject.url;
@@ -294,15 +273,10 @@ function SrsRtcPlayerAsync() {
         var conf = self.__internal.prepareUrl(url);
 
         self.pc.addTransceiver("audio", { direction: "recvonly" });
-        // self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.camera] });
         self.pc.addTransceiver("video", { direction: "recvonly", streams: [self.screen] });
 
 
         var offer = await self.pc.createOffer();
-        // console.log('本地sdp', offer.sdp);
-        // 本地生成的sdp与answer的m=行修改一致(当摄像头与屏幕同时存在时)
-        // offer.sdp = offer.sdp.replace(/a=group:BUNDLE 0 1 2/g, 'a=group:BUNDLE 0 1 video-1')
-        // offer.sdp = offer.sdp.replace(/a=mid:2/g, 'a=mid:video-1')
 
         await self.pc.setLocalDescription(offer);
         // console.log('本地offer', offer.sdp);
@@ -346,17 +320,7 @@ function SrsRtcPlayerAsync() {
     // 接收到远端的音视频轨道时
     // The callback when got remote track.
     self.ontrack = function (event) {
-        // console.log(event);
-        // console.log(event.track);
         self.screen.addTrack(event.track)
-        // if (event.track.kind == 'video') {
-        //     self.screen.addTrack(event.track);
-        // }
-        // else if (event.track.kind == 'audio') {
-        //     self.audio.addTrack(event.track);
-        // }
-
-
     };
 
     // Internal APIs.
