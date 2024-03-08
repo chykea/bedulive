@@ -92,10 +92,11 @@
 
 <script setup>
 import { reactive, ref } from "vue";
-import { changePassword, changeInfo, uploadAvatar } from '../../request/index'
+import { changePassword, changeInfo } from '../../request/index'
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useRootStore } from '../../store/index'
+import { handleUpload } from "../../utils/uploadFIle";
 const store = useRootStore()
 const router = useRouter()
 const model = reactive({
@@ -217,10 +218,7 @@ const beforeAvatarUpload = () => {
 
 }
 const uploadImage = async (params) => {
-    const file = params.file;
-    const formData = new FormData();
-    formData.append('file', file);
-    const { data } = await uploadAvatar(formData)
+    const { data } = await handleUpload(params.file, 'avatar')
     if (data.result) {
         avatarUrl.value = data.result.avatar
         store.userInfo.avatar_url = data.result.avatar
@@ -238,34 +236,32 @@ const handleAvatarSuccess = (res, file) => {
     height: 178px;
 }
 
-:v-deep {
-    .avatar-uploader .avatar {
-        width: 178px;
-        height: 178px;
-        object-fit: cover;
-        display: block;
-    }
+:deep(.avatar-uploader .avatar) {
 
-    .avatar-uploader .el-upload {
-        border: 1px dashed var(--el-border-color);
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: var(--el-transition-duration-fast);
-    }
+    width: 178px;
+    height: 178px;
+    object-fit: cover;
+    display: block;
+}
 
-    .avatar-uploader .el-upload:hover {
-        border-color: var(--el-color-primary);
-    }
+:deep(.avatar-uploader .el-upload) {
+    border: 1px dashed var(--el-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--el-transition-duration-fast);
+}
 
-    .el-icon.avatar-uploader-icon {
-        font-size: 28px;
-        color: #8c939d;
-        width: 178px;
-        height: 178px;
-        text-align: center;
-    }
+:deep(.avatar-uploader .el-upload:hover) {
+    border-color: var(--el-color-primary);
+}
+
+:deep(.el-icon.avatar-uploader-icon) {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    text-align: center;
 }
 </style>
-<style></style>
