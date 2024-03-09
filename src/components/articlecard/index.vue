@@ -2,9 +2,11 @@
     <div class="col-lg-6 col-12">
         <div class="single-news wow fadeInUp" data-wow-delay=".2s">
             <!-- 封面 -->
-            <!-- <div class="image">
-                <a href="blog-single-sidebar.html"><img class="thumb" src="assets/images/blog/blog1.jpg" alt="#"></a>
-            </div> -->
+            <div class="image" v-if="article.cover_url">
+                <router-link :to="'/article/detail?articleId=' + article.id">
+                    <img class="thumb" :src="article.cover_url" alt="#">
+                </router-link>
+            </div>
             <div class="content-body">
                 <h4 class="title">
                     <router-link :to="'/article/detail?articleId=' + article.id">
@@ -30,6 +32,7 @@
 const props = defineProps({
     article: Object
 })
+console.log(props.article);
 </script>
 
 <style lang='scss' scoped>
@@ -37,6 +40,18 @@ const props = defineProps({
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+}
+
+.image {
+    text-align: center;
+
+    a {
+        .thumb {
+            height: 240px;
+            object-fit: contain;
+        }
+    }
 
 }
 </style>

@@ -4,31 +4,42 @@ const getPurpose = (purpose) => { // 上传的文件作为什么用途
     switch (purpose) {
         case 'avatar':
             return 'avatar';
+        case 'cover':
+            return 'cover';
         default:
             return 'file'
     }
 }
+/**
+ * 
+ * @param {文件} file 
+ * @param {用途} use 
+ * @returns 
+ */
 async function handleUpload(file, use = 'file') {
     if (!file) return
+
     const purpose = getPurpose(use)
     const { fileChunkList, type, size } = createFileChunk(file) // 创建切片,返回值为切片数组,文件类型,切片标准大小
     const hash = await calculateHash(fileChunkList) // 计算文件的hash值
-    const { needUpload } = await verifyUpload(type, hash);
+    const { needUpload, url } = await verifyUpload(type, hash);
     if (!needUpload) {
-        ElMessage({
-            message: "上传成功",
-            type: "success",
-            duration: 1000
-        })
-        return;
+        return {
+            code: '0',
+            message: '上传成功',
+            data: {
+                result: { url }
+            }
+        };
     }
+
     const res = await uploadChunk(fileChunkList, type, hash, size, purpose)
     return res
 }
 
 // 创建切片
 function createFileChunk(file) {
-    const chunkSize = 100 * 1024; // 切片大小 100kb
+    const chunkSize = 1 * 1024 * 1024; // 切片大小 100kb
     const totalChunk = Math.ceil(file.size / chunkSize); // 根据文件大小计算出切片的个数
     const fileChunkList = []; // 存放切片blob
     for (let i = 0; i < totalChunk; i++) {
@@ -73,8 +84,9 @@ async function verifyUpload(type, hash) {
     const { data } = await shouldUpload({ type, hash })
     // fetch要查看响应体,需要调用.json方法
     const needUpload = data.shouldUpload
+    const url = data.url
 
-    return { needUpload }
+    return { needUpload, url }
 }
 
 

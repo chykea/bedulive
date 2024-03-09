@@ -5,9 +5,9 @@
                 <div class="col-lg-8 col-md-12 col-12">
                     <div class="single-inner">
                         <!-- 封面 -->
-                        <!-- <div class="post-thumbnils">
-                            <img src="assets/images/blog/blog-single.jpg" alt="#">
-                        </div> -->
+                        <div class="post-thumbnils" v-if="article.cover_url">
+                            <img :src="article.cover_url" alt="#">
+                        </div>
                         <div class="post-details">
                             <div class="detail-inner">
                                 <!-- 标题 -->
@@ -25,6 +25,12 @@
                                     </li>
 
                                 </ul>
+                                <div v-if="article.file_url">
+                                    <span class="des">文章附件：</span>&nbsp;
+                                    <el-link>{{ article.file_name }}</el-link>&nbsp;
+                                    <a class="el-link" @click="download(article.file_url, article.file_name)"
+                                        target="_blank">下载</a>
+                                </div>
                                 <!-- 文章内容 -->
                                 <div v-html="article.content" style="margin-top: 15px;">
                                 </div>
@@ -126,10 +132,51 @@ const publishComment = async () => {
         contentRef.value = ''
     }
 }
+
+const download = (url, fileName) => {//跨域文件路径、下载到本地的文件名
+    var x = new XMLHttpRequest();
+    x.open("GET", url, true);
+    x.responseType = 'blob';
+    x.onload = function (e) {
+        var url = window.URL.createObjectURL(x.response)
+        var a = document.createElement('a');
+        a.href = url
+        a.download = fileName;
+        a.click()
+    }
+    x.send();
+}
+
+
 </script>
 
 <style lang='scss' scoped>
 .user {
     text-align: center;
+}
+
+.post-thumbnils {
+    background-color: #fff;
+
+    img {
+        height: 450px;
+        object-fit: contain;
+    }
+}
+
+.des {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    position: relative;
+    text-decoration: none;
+    outline: 0;
+    cursor: default;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+
 }
 </style>

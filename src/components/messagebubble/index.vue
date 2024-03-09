@@ -1,14 +1,12 @@
 <template>
     <div style="margin: 10px 0;">
         <li :class="isOwn ? 'right' : 'left'">
-            <el-avatar class="head"> {{ isOwn ? 'you' : user.nick_name }}</el-avatar>
+            <el-avatar class="head" :src="user.avatar_url"> {{ isOwn ? 'you' : user.nick_name }}</el-avatar>
             <p class="text">{{ msg }} </p>
         </li>
     </div>
 </template>
 <script setup>
-import { getInfo } from '../../utils/util';
-const curUser = getInfo()
 
 const props = defineProps({
     msg: String,

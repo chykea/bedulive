@@ -9,8 +9,7 @@
                     </div>
                     <div class="upload-img">
                         <el-upload class="avatar-uploader" :http-request="uploadImage" :show-file-list="false"
-                            accept="image/jpeg,image/png" :on-success="handleAvatarSuccess"
-                            :before-upload="beforeAvatarUpload">
+                            accept="image/jpeg,image/png" :before-upload="beforeAvatarUpload">
                             <img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
                             <el-icon v-else class="avatar-uploader-icon">
                                 <Plus />
@@ -220,13 +219,17 @@ const beforeAvatarUpload = () => {
 const uploadImage = async (params) => {
     const { data } = await handleUpload(params.file, 'avatar')
     if (data.result) {
-        avatarUrl.value = data.result.avatar
-        store.userInfo.avatar_url = data.result.avatar
+        await changeInfo({ avatar_url: data.result.url })
+        avatarUrl.value = data.result.url
+        store.userInfo.avatar_url = data.result.url
+        ElMessage({
+            message: "上传成功",
+            type: "success",
+            duration: 1000
+        })
     }
 }
-const handleAvatarSuccess = (res, file) => {
 
-}
 </script>
 
 <style lang='scss' scoped>
