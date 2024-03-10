@@ -46,14 +46,23 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
-import { nextTick, ref, onBeforeUnmount, } from 'vue'
+import { nextTick, ref, onBeforeUnmount, watch, } from 'vue'
 import { debounce } from '../../utils/util'
 import { ElMessage } from 'element-plus'
+import { getSocket } from '../../utils/socket'
+import { useToolStore } from '../../store'
+const store = useToolStore()
+const emits = defineEmits(['update:modelValue'])
 
+const client = getSocket()
 const language = ref('javascript')
 const theme = ref('vs')
 const fontSize = ref(16)
 const code = ref('')
+
+
+const editorLock = ref(false)
+
 
 const languageOptions = [
     {
@@ -77,8 +86,6 @@ const languageOptions = [
         label: 'json',
     },
 ]
-
-
 const themeOptions = [
     {
         value: 'vs',
@@ -116,9 +123,8 @@ self.MonacoEnvironment = {
         return new EditorWorker()
     },
 }
-
+// 编辑器初始化
 let editor;
-
 const editorInit = () => {
     nextTick(() => {
         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -148,7 +154,15 @@ const editorInit = () => {
         }) :
             editor.setValue("");
         editor.onDidChangeModelContent(debounce((val) => {
-            code.value = editor.getValue()
+            if (!(editorLock.value)) { // 没有锁就执行
+                // code.value 用于导入导出代码
+                // store.code 用于存储当前语言编辑的代码
+                store.code = code.value = editor.getValue()
+                if (store.connect) { // 当加入房间时再进行发送
+                    client.socket.emit('sendCode', { roomId: store.roomId, code: code.value, })
+                }
+            }
+            editorLock.value = false
         }))
     })
 }
@@ -193,7 +207,6 @@ const getExtensionFromLanguage = (extension) => {
     }
 }
 const showImport = ref(false);
-
 const exportFile = () => {
     if (code.value === '') {
         ElMessage({
@@ -211,7 +224,6 @@ const exportFile = () => {
     a.click();
     window.URL.revokeObjectURL(url);
 }
-
 // 导入代码
 const importFile = (file) => {
     var postfix = getFileExtension(file.name);
@@ -232,7 +244,6 @@ const importFile = (file) => {
         showImport.value = false;
     }
 }
-
 const getFileExtension = (filename) => filename.split('.').pop().toLowerCase();
 const getLanguageFromExtension = (extension) => {
     switch (extension) {
@@ -250,6 +261,12 @@ const getLanguageFromExtension = (extension) => {
 }
 
 
+// 加入房间获取代码,获取代码需要锁住编辑器,放置设置代码之后   器触发监听事件
+client.socket.on('receiveCode', (data) => {
+    editorLock.value = true;
+    store.code = code.value = data.code;
+    editor.setValue(data.code);
+})
 </script>
 
 <style scoped>

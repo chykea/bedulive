@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 class createSocket {
     socket = null
+    // url为socket服务地址
     constructor(url = import.meta.env.VITE_SOCKET_URL) {
         this.socket = io(url)
     }

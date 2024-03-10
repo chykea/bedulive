@@ -1,7 +1,7 @@
 <template>
     <div id="codeEditBox"></div>
 </template>
-  
+
 
 <script setup>
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
@@ -47,7 +47,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     editor.dispose()
-
 })
 
 
@@ -142,7 +141,7 @@ const getIsReadOnly = () => {
 defineExpose({ changeLanguage, setReadOnly, setEditorValue, getIsReadOnly })
 
 </script>
-  
+
 <style scoped>
 #codeEditBox {
     height: 100%;
