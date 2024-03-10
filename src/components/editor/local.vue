@@ -18,6 +18,7 @@
     <el-button @click="changeMinimap" class="custom-el-btn-color" plain>minimap</el-button>
     <el-button @click="showImport = true" class="custom-el-btn-color" plain>导入</el-button>
     <el-button @click="exportFile" class="custom-el-btn-color" plain>导出</el-button>
+    <el-button @click="runCode" class="custom-el-btn-color" plain>运行</el-button>
 
     <div id="codeEditBox"></div>
     <el-dialog v-model="showImport">
@@ -46,9 +47,9 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
-import { nextTick, ref, onBeforeUnmount, watch, } from 'vue'
+import { nextTick, ref, onBeforeUnmount, h } from 'vue'
 import { debounce } from '../../utils/util'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { getSocket } from '../../utils/socket'
 import { useToolStore } from '../../store'
 const store = useToolStore()
@@ -259,7 +260,26 @@ const getLanguageFromExtension = (extension) => {
             return 'plaintext'; // 默认设置为纯文本
     }
 }
+const runCode = () => {
+    if (language.value !== 'javascript') {
+        ElMessage({
+            message: '只支持运行js代码',
+            type: 'error',
+            duration: 1000
+        })
+        return
+    }
+    client.socket.emit('runCode', { code: code.value });
+}
 
+client.socket.on('runRes', (result) => {
+    const vnode = h('div', generateResult(result))
+    ElMessageBox.alert(vnode, '运行结果')
+});
+
+client.socket.on('runErr', (error) => {
+    console.error('执行错误:', error);
+});
 
 // 加入房间获取代码,获取代码需要锁住编辑器,防止设置代码之后编辑器触发监听事件
 client.socket.on('receiveCode', (data) => {
@@ -267,6 +287,9 @@ client.socket.on('receiveCode', (data) => {
     store.code = code.value = data.code;
     editor.setValue(data.code);
 })
+const generateResult = (result) => result.map((item, index) => h('div', (index + 1) + '.' + item));
+
+
 </script>
 
 <style scoped>
