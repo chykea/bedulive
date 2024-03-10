@@ -47,6 +47,7 @@ import { useRootStore, useToolStore } from '../../store';
 import { getSocket } from '../../utils/socket'
 const store = useRootStore()
 const roomStore = useToolStore()
+// const canvaStore = useCanvaStore()
 const userInfo = ref({})
 const client = getSocket()
 watchEffect(() => {

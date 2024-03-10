@@ -261,7 +261,7 @@ const getLanguageFromExtension = (extension) => {
 }
 
 
-// 加入房间获取代码,获取代码需要锁住编辑器,放置设置代码之后   器触发监听事件
+// 加入房间获取代码,获取代码需要锁住编辑器,防止设置代码之后编辑器触发监听事件
 client.socket.on('receiveCode', (data) => {
     editorLock.value = true;
     store.code = code.value = data.code;

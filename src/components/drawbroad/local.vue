@@ -35,9 +35,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
-
+import { ref, onMounted, nextTick } from 'vue'
 import DrawBroad from '../../utils/drawbroad'
+// import { useCanvaStore } from '../../store';
+// const store = useCanvaStore()
 
 
 
@@ -71,7 +72,7 @@ const allowCallback = (cancel, go) => {
 const moveCallback = (...arr) => {
     // send(arr)
 }
-// 发送消息给远端
+
 /* const send = (arr) => {
     if (arr[0] == 'gatherImage') {
         client.socket.emit('sendPaint', {
@@ -81,7 +82,6 @@ const moveCallback = (...arr) => {
         })
     }
 } */
-
 onMounted(() => {
     drawbroad.value.width = document.querySelector('.drawbroad').clientWidth
     drawbroad.value.height = document.querySelector('.drawbroad').clientHeight
@@ -122,16 +122,13 @@ const handleClick = (v) => { // 操作按钮
     if (['color', 'lineWidth'].includes(v.type)) return; // 如果是颜色和线宽，不需要改变按钮状态
     currHandle.value = v.type;
 }
-
 const download = (url) => {
-
     // 创建一个 a 标签，并设置 href 和 download 属性
     const el = document.createElement('a');
     // 设置 href 为图片经过 base64 编码后的字符串，默认为 png 格式
     el.href = url;
+    // 下载时文件的名称
     el.download = new Date().toLocaleDateString();
-
-
     // 创建一个点击事件并对 a 标签进行触发
     const event = new MouseEvent('click');
     el.dispatchEvent(event);

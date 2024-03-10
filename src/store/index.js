@@ -28,6 +28,15 @@ export const useToolStore = defineStore('toolStore', () => {
     return { code, language, connect, roomId, userList }
 })
 
+// 画板
+// export const useCanvaStore = defineStore('canvaStore', () => {
+//     const roomId = ref('')
+//     const connect = ref(false) // 是否已加入房间
+//     const userList = ref([])
+//     const imgSrc = ref('')
+//     return { imgSrc, connect, roomId, userList }
+// })
+
 
 
 
