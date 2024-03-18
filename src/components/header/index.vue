@@ -6,7 +6,7 @@
                     <div class="nav-inner">
                         <nav class="navbar navbar-expand-lg">
                             <router-link class="navbar-brand" to="/">
-                                <img src="../../assets/images/logo/logo.svg" alt="Logo" />
+                                Bedulive
                             </router-link>
                             <!-- 页面放大后出现的 -->
                             <button class="navbar-toggler mobile-menu-btn" type="button">

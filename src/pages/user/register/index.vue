@@ -5,11 +5,11 @@
             <div class="row">
                 <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
                     <div class="form-head">
-                        <h4 class="title">Registration</h4>
+                        <h4 class="title">注册</h4>
                         <el-radio-group class="identity-panel" v-model="identity" label="identity">
-                            <el-radio-button label="1">学生</el-radio-button>
-                            <el-radio-button label="2">教师</el-radio-button>
-                            <el-radio-button label="0">管理</el-radio-button>
+                            <el-radio-button value="1" size="large">学生</el-radio-button>
+                            <el-radio-button value="2" size="large">教师</el-radio-button>
+                            <!-- <el-radio-button label="0">管理</el-radio-button> -->
                         </el-radio-group>
                         <el-form :model="formData" :rules="rules" ref="formDataRef">
                             <el-form-item prop="user_name" class="form-group">
@@ -42,8 +42,8 @@
                                 </el-input>
                             </el-form-item>
                             <el-form-item label="" class="button">
-                                <el-button type="primary" class="btn custom-el-btn-color" @click="registerFunc(formDataRef)"
-                                    size="large">注册</el-button>
+                                <el-button type="primary" class="btn custom-el-btn-color"
+                                    @click="registerFunc(formDataRef)" size="large">注册</el-button>
                             </el-form-item>
                             <p class="outer-link">已有账号？ <router-link to="/user/login"> 返回登录</router-link>
                             </p>
@@ -66,7 +66,6 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '../../../request/index'
-// const { user: { login, register } } = api
 const router = useRouter()
 const identity = ref('1')
 const formDataRef = ref();
@@ -136,8 +135,6 @@ const registerFunc = (formEle) => {
                 const { user_name, password } = formData
                 const form_obj = { user_name, password, identity: identity.value }
                 const { data } = await register(form_obj)
-                // const token = result.token;
-                // const userInfo = { user_name: result.user_name, nick_name: result.user_name, identity: result.identity }
                 ElMessage({
                     message: data.message,
                     duration: 1000,
@@ -158,5 +155,11 @@ const registerFunc = (formEle) => {
 <style lang='scss' scoped>
 .identity-panel {
     margin-bottom: 22px;
+}
+
+:deep(.el-radio-button__original-radio:checked+.el-radio-button__inner) {
+    color: #fff;
+    background-color: #5830E0;
+    border-color: #5830E0;
 }
 </style>

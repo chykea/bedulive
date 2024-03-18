@@ -68,9 +68,7 @@ const map = new Map([
 ])
 
 watchEffect(() => {
-
     user.value = store.userInfo
-    console.log(user.value);
 })
 
 
