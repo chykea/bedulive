@@ -23,19 +23,20 @@ export const useToolStore = defineStore('toolStore', () => {
     const roomId = ref('')
     const connect = ref(false) // 是否已加入房间
     const userList = ref([])
-    const code = ref('')
+
     const language = ref('')
-    return { code, language, connect, roomId, userList }
+    return { language, connect, roomId, userList }
+})
+export const useCodeStore = defineStore('codeStore', () => {
+    const code = ref('')
+    return { code }
 })
 
 // 画板
-// export const useCanvaStore = defineStore('canvaStore', () => {
-//     const roomId = ref('')
-//     const connect = ref(false) // 是否已加入房间
-//     const userList = ref([])
-//     const imgSrc = ref('')
-//     return { imgSrc, connect, roomId, userList }
-// })
+export const useCanvaStore = defineStore('canvaStore', () => {
+    const imgSrc = ref('')
+    return { imgSrc }
+})
 
 
 

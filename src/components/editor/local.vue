@@ -51,8 +51,9 @@ import { nextTick, ref, onBeforeUnmount, h } from 'vue'
 import { debounce } from '../../utils/util'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getSocket } from '../../utils/socket'
-import { useToolStore } from '../../store'
-const store = useToolStore()
+import { useToolStore, useCodeStore } from '../../store'
+const roomStore = useToolStore()
+const codeStore = useCodeStore()
 const emits = defineEmits(['update:modelValue'])
 
 const client = getSocket()
@@ -157,10 +158,9 @@ const editorInit = () => {
         editor.onDidChangeModelContent(debounce((val) => {
             if (!(editorLock.value)) { // 没有锁就执行
                 // code.value 用于导入导出代码
-                // store.code 用于存储当前语言编辑的代码
-                store.code = code.value = editor.getValue()
-                if (store.connect) { // 当加入房间时再进行发送
-                    client.socket.emit('sendCode', { roomId: store.roomId, code: code.value, })
+                codeStore.code = code.value = editor.getValue()
+                if (roomStore.connect) { // 当加入房间时再进行发送
+                    client.socket.emit('sendCode', { roomId: roomStore.roomId, code: code.value, })
                 }
             }
             editorLock.value = false
@@ -284,9 +284,10 @@ client.socket.on('runErr', (error) => {
 // 加入房间获取代码,获取代码需要锁住编辑器,防止设置代码之后编辑器触发监听事件
 client.socket.on('receiveCode', (data) => {
     editorLock.value = true;
-    store.code = code.value = data.code;
+    codeStore.code = code.value = data.code;
     editor.setValue(data.code);
 })
+// 生成代码运行结果
 const generateResult = (result) => result.map((item, index) => h('div', (index + 1) + '.' + item));
 
 

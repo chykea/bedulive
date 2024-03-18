@@ -43,11 +43,12 @@
 <script setup>
 import Header from '../../components/header/index.vue'
 import { ref, defineAsyncComponent, watchEffect } from 'vue'
-import { useRootStore, useToolStore } from '../../store';
+import { useRootStore, useToolStore, useCodeStore, useCanvaStore } from '../../store';
 import { getSocket } from '../../utils/socket'
 const store = useRootStore()
 const roomStore = useToolStore()
-// const canvaStore = useCanvaStore()
+const codeStore = useCodeStore()
+const canvaStore = useCanvaStore()
 const userInfo = ref({})
 const client = getSocket()
 watchEffect(() => {
@@ -94,7 +95,7 @@ const shareCode = () => {
     roomStore.connect = true
     roomStore.roomId = userInfo.value.uid
     roomStore.userList = [userInfo.value]
-    client.socket.emit('createRoom', { roomId: userInfo.value.uid, user: userInfo.value, code: roomStore.code })
+    client.socket.emit('createRoom', { roomId: userInfo.value.uid, user: userInfo.value, code: codeStore.code, imgSrc: canvaStore.imgSrc })
     ElMessageBox.alert(`房间号为：${roomStore.roomId}`, '共享代码', {
         confirmButtonText: 'OK',
     })
@@ -142,6 +143,10 @@ window.onunload = () => {
     window.onunload = null
 }
 
+// 需要在这里接收绘画信息
+client.socket.on('receiveImg', (data) => {
+    canvaStore.imgSrc = data.imgSrc
+})
 
 </script>
 

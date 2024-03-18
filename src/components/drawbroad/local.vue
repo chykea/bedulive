@@ -35,10 +35,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import DrawBroad from '../../utils/drawbroad'
-// import { useCanvaStore } from '../../store';
-// const store = useCanvaStore()
+import { useToolStore, useCanvaStore } from '../../store';
+import { getSocket } from '../../utils/socket'
+const client = getSocket();
+const roomStore = useToolStore()
+const canvaStore = useCanvaStore()
 
 
 
@@ -70,18 +73,21 @@ const allowCallback = (cancel, go) => {
     allowGo.value = !go;
 }
 const moveCallback = (...arr) => {
-    // send(arr)
+    canvaStore.imgSrc = drawbroadInstance.imgSrc
+    // 当用户加入到房间后再发送会话数据
+    if (roomStore.connect) {
+        send(arr)
+    }
 }
 
-/* const send = (arr) => {
+const send = (arr) => {
     if (arr[0] == 'gatherImage') {
-        client.socket.emit('sendPaint', {
-            roomId,
-            user: userInfo,
-            data: drawbroadInstance.imgSrc
+        client.socket.emit('sendImg', {
+            roomId: roomStore.roomId,
+            imgSrc: drawbroadInstance.imgSrc
         })
     }
-} */
+}
 onMounted(() => {
     drawbroad.value.width = document.querySelector('.drawbroad').clientWidth
     drawbroad.value.height = document.querySelector('.drawbroad').clientHeight
@@ -92,6 +98,11 @@ onMounted(() => {
         allowCallback: allowCallback,
         moveCallback: moveCallback
     })
+    watch(() => canvaStore.imgSrc, (newVal) => {
+
+        drawbroadInstance.imgSrc = newVal
+        drawbroadInstance.drawImage(newVal)
+    }, { immediate: true })
 })
 const sidesChange = (sides) => { // 改变多边形边数
     nextTick(() => {
@@ -133,6 +144,7 @@ const download = (url) => {
     const event = new MouseEvent('click');
     el.dispatchEvent(event);
 }
+
 
 </script>
 
