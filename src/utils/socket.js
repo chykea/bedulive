@@ -3,9 +3,19 @@ class createSocket {
     socket = null
     // url为socket服务地址
     constructor(url = import.meta.env.VITE_SOCKET_URL) {
-        this.socket = io(url)
+        this.url = url
+        this.socket = io(url, { autoConnect: true }) // 自动连接
+        this.isConnected = true
     }
 
+    connect() {
+        this.socket.connect()
+        this.isConnected = true
+    }
+    disconnect() {
+        this.socket.disconnect()
+        this.isConnected = false
+    }
     join(config) {
         if (config.roomId == '') {
             console.log('没有房间号');

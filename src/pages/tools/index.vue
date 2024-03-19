@@ -14,7 +14,7 @@
 
                             </div>
                         </nav>
-                        <div class="connect" v-if="JSON.stringify(userInfo) !== 'null'">
+                        <div class="connect" v-if="JSON.stringify(userInfo) !== '{}'">
                             <el-button @click="shareCode" :disabled="roomStore.connect">创建房间</el-button>
                             <el-button @click="joinRoom" :disabled="roomStore.connect">加入房间</el-button>
                             <el-button @click="leaveRoom" :disabled="!roomStore.connect">离开房间</el-button>
@@ -42,7 +42,7 @@
 
 <script setup>
 import Header from '../../components/header/index.vue'
-import { ref, defineAsyncComponent, watchEffect } from 'vue'
+import { ref, defineAsyncComponent, watchEffect, onBeforeUnmount } from 'vue'
 import { useRootStore, useToolStore, useCodeStore, useCanvaStore } from '../../store';
 import { getSocket } from '../../utils/socket'
 const store = useRootStore()
@@ -74,8 +74,6 @@ const map = new Map([
     ['Editor', EditorAsync],
     ['DrawBroad', DrawBroadAsync]
 ])
-
-
 // 加入房间
 const joinRoom = () => {
     ElMessageBox.prompt('请输入房间号', 'Tip', {
@@ -83,14 +81,20 @@ const joinRoom = () => {
         cancelButtonText: 'Cancel',
     })
         .then(({ value }) => {
+            if (!client.isConnected) {
+                client.connect()
+            }
             roomStore.roomId = value
             client.socket.emit('joinRoom', { roomId: value, user: userInfo.value })
         })
 
 }
-
 // 开启房间
 const shareCode = () => {
+    // 如果socket没有连接时
+    if (!client.isConnected) {
+        client.connect()
+    }
     // 首先用户要先加入房间
     roomStore.connect = true
     roomStore.roomId = userInfo.value.uid
@@ -107,12 +111,13 @@ client.socket.on('roomNotExist', () => {
     })
     roomStore.roomId = ''
 })
-
 const leaveRoom = () => {
     client.socket.emit('leaveRoom', { roomId: roomStore.roomId, user: userInfo.value })
     roomStore.connect = false
     roomStore.roomId = ''
     roomStore.userList = []
+    // 关闭连接
+    client.disconnect()
 }
 // 成功加入房间
 client.socket.on('successJoin', (data) => {
@@ -136,13 +141,13 @@ client.socket.on('roomOwnerLeave', (data) => {
 })
 // 页面关闭时离开房间
 window.onunload = () => {
-    client.socket.emit('leaveRoom', { roomId: roomStore.roomId, user: userInfo.value })
-    roomStore.connect = false
-    roomStore.roomId = ''
-    roomStore.userList = []
+    leaveRoom()
     window.onunload = null
 }
-
+// 切换模块之后离开房间
+onBeforeUnmount(() => {
+    leaveRoom()
+})
 // 需要在这里接收绘画信息
 client.socket.on('receiveImg', (data) => {
     canvaStore.imgSrc = data.imgSrc
