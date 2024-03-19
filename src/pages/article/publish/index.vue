@@ -74,6 +74,7 @@ import { useRouter } from 'vue-router'
 import { getArticle, updateArticle, publishArticle } from '../../../request/index'
 import { handleUpload } from '../../../utils/uploadFIle';
 import { ElMessage } from 'element-plus';
+import { debounce } from '../../../utils/util';
 
 const TipTap = defineAsyncComponent({
     loader: () => import('../../../components/tiptap/index.vue'),
@@ -107,7 +108,7 @@ if (tid) {
     })()
 }
 
-const handleSubmit = async (id) => {
+const handleSubmit = debounce(async (id) => {
     if (title.value === '') {
         ElMessage({ message: '标题不能为空', type: 'warning', duration: 1000 })
         return
@@ -175,7 +176,7 @@ const handleSubmit = async (id) => {
 
         }
     }
-}
+})
 
 const handleEmpty = (val) => {
     isEmpty.value = val

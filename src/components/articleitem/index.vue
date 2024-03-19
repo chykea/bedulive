@@ -58,7 +58,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getUserArticle, deleteArticle } from '../../request/index'
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 const router = useRouter()
 const articleList = ref([])
 const total = ref(0)
@@ -80,19 +80,32 @@ const checkDetail = (id) => {
     router.push('/article/detail?articleId=' + id)
 }
 
-const deleteThis = async (id) => {
-    const { data } = await deleteArticle(id)
-
-    if (data.code === '0') {
-        ElMessage({
-            message: '删除成功',
-            type: 'success',
-            duration: 1000,
-            onClose: () => {
-                articleList.value = articleList.value.filter(item => item.id !== id)
+const deleteThis = (id) => {
+    ElMessageBox.confirm(
+        '删除文章操作不可逆！是否继续！',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(async () => {
+            const { data } = await deleteArticle(id)
+            if (data.code === '0') {
+                ElMessage({
+                    message: '删除成功',
+                    type: 'success',
+                    duration: 1000,
+                    onClose: () => {
+                        articleList.value = articleList.value.filter(item => item.id !== id)
+                    }
+                })
             }
         })
-    }
+        .catch(() => {
+        })
+
 }
 
 

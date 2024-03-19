@@ -2797,17 +2797,17 @@ ul.custom-flex {
   color: #5830E0;
 }
 
-.post-details p {
+/* .post-details p {
   font-size: 15px;
-  /* margin: 30px 0; */
-}
+   margin: 30px 0; 
+} */
 
-.post-details h3 {
+/* .post-details h3 {
   font-size: 22px;
   margin-bottom: 20px;
   font-weight: 600;
   line-height: 28px;
-}
+} */
 
 .post-details p:last-child {
   margin-bottom: 0;

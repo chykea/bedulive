@@ -32,7 +32,7 @@
                                         target="_blank">下载</a>
                                 </div>
                                 <!-- 文章内容 -->
-                                <div v-html="article.content" style="margin-top: 15px;">
+                                <div class="content-box" v-html="article.content">
                                 </div>
                             </div>
                             <!-- 评论 -->
@@ -179,5 +179,18 @@ const download = (url, fileName) => {//跨域文件路径、下载到本地的�
     font-size: 14px;
     font-weight: 500;
 
+}
+
+.content-box {
+    margin-top: 15px;
+
+    :deep(ol) {
+        list-style: decimal !important;
+        list-style-position: inside !important;
+
+        p {
+            display: inline;
+        }
+    }
 }
 </style>
