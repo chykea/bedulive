@@ -8,12 +8,12 @@
                     <el-button style="margin-left: 10px;" @click="showCover = true">选择封面</el-button>
                     <el-button style="margin-left: 10px;" @click="showFile = true">添加附件</el-button>
                 </div>
-                <div class="blog-annex" v-show="file_name !== ''">
+                <div class="blog-annex" v-show="file_name">
                     <el-link :href="file_url" target="_blank">{{ file_name }}</el-link>
                     &nbsp;
                     <span @click="deleteFile" class="el-link">删除</span>
                 </div>
-                <div class="blog-cover" v-show="cover_url !== ''">
+                <div class="blog-cover" v-show="cover_url">
                     <el-link :href="cover_url" target="_blank">{{ cover_name }}</el-link>
                     &nbsp;
                     <span @click="deleteCover" class="el-link">删除</span>
@@ -99,9 +99,11 @@ if (tid) {
         digest.value = data.res.digest
         html.value = data.res.content
         cover_url.value = data.res.cover_url
+        cover_name.value = data.res.cover_url.replace(/^http(s|):\/\/\S*?\//, '')
         file_name.value = data.res.file_name
         file_url.value = data.res.file_url
         isEmpty.value = false
+        // console.log(cover_name.value);
     })()
 }
 

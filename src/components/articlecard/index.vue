@@ -32,7 +32,6 @@
 const props = defineProps({
     article: Object
 })
-console.log(props.article);
 </script>
 
 <style lang='scss' scoped>

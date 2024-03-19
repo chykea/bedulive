@@ -97,6 +97,7 @@ import { ref } from 'vue';
 import { useRoute } from 'vue-router'
 import { getArticle, addComment } from '../../../request/index'
 import { ElMessage } from 'element-plus';
+import { debounce } from '../../../utils/util';
 import Comment from '../../../components/comments/index.vue'
 const route = useRoute()
 const id = route.query.articleId;
@@ -112,14 +113,15 @@ const getArticleDetail = async () => {
     commentsRef.value.forEach(item => {
         item['expanded'] = false
     })
-
 }
 getArticleDetail()
 const contentRef = ref('')
-const publishComment = async () => {
+const publishComment = debounce(async () => {
+    if (!contentRef.value.trim()) return
     const parentId = null, content = contentRef.value, articleId = id;
     const { data } = await addComment({ parentId, content, articleId })
     if (data.code == '0') {
+        contentRef.value = ''
         ElMessage({
             message: data.message,
             type: 'success',
@@ -129,9 +131,8 @@ const publishComment = async () => {
                 location.reload()
             }
         })
-        contentRef.value = ''
     }
-}
+})
 
 const download = (url, fileName) => {//跨域文件路径、下载到本地的文件名
     var x = new XMLHttpRequest();
