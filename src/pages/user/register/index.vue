@@ -144,7 +144,6 @@ const registerFunc = (formEle) => {
                     }
                 })
             } catch (e) {
-                console.log(e);
             };
         } else {
             return false

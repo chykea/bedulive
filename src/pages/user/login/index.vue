@@ -40,8 +40,8 @@
                                 </div>
                             </div>
                             <el-form-item class="button">
-                                <el-button class="btn custom-el-btn-color" type="primary" @click="loginFunc(formDataRef)"
-                                    size="large">登录</el-button>
+                                <el-button class="btn custom-el-btn-color" type="primary"
+                                    @click="loginFunc(formDataRef)" size="large">登录</el-button>
                             </el-form-item>
                             <p class="outer-link">没有账号? <router-link to="/user/register">点击注册</router-link></p>
                         </el-form>
@@ -96,7 +96,6 @@ const loginFunc = async (formEl) => {
             try {
                 const { data } = await login(form_obj)
                 const { token, id, ...result } = data.result
-
                 ElMessage({
                     message: data.message,
                     duration: 1000,
@@ -104,18 +103,14 @@ const loginFunc = async (formEl) => {
                     onClose: () => {
                         const userInfo = result
                         // 登录成功后，将token存储到sessionStorage中
+                        // 持久化存储，直接存到pinia中即可
                         store.token = token
                         store.userInfo = userInfo
-                        // sessionStorage.setItem('token', token)
-                        // sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                         router.push('/')
                     }
                 })
-
             } catch (e) {
-                ElMessage({ message: '密码错误', duration: 1000, type: 'error' })
             }
-
         } else {
             return false
         }

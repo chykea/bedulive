@@ -78,18 +78,20 @@ request.interceptors.response.use(
     res => res.status === 200 ? Promise.resolve(res) : Promise.reject(res),
     //请求失败
     error => {
+        console.log(error.response);
         //可根据不同的状态去区分不同的错误，达到不同效果
         if (error.response && error.response.status) {
-            const { data } = error.response;
-            // 如果报错或过期
-            if (data.code === '10101' || data.code === '10102') {
 
+            const { data } = error.response;
+
+            // 如果token过期或无效
+            if (data.code === '10101' || data.code === '10102') {
                 sessionStorage.removeItem('token')
                 sessionStorage.removeItem('userInfo')
                 router.push('/user/login');
             }
             ElMessage({
-                message: data.message || 'Error',
+                message: data.message,
                 duration: 1500, type: 'error'
             })
 

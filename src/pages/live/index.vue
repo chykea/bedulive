@@ -88,15 +88,15 @@ const Editor = defineAsyncComponent({
   loader: () => import("../../components/editor/index.vue"),
   loadingComponent: () => import("../../components/loading/index.vue"),
   errorComponent: () => import("../../components/error/index.vue"),
-  delay: 2000,
-  timeout: 5000,
+  delay: 5000,
+  timeout: 10000,
 });
 const DrawBroad = defineAsyncComponent({
   loader: () => import("../../components/drawbroad/index.vue"),
   loadingComponent: () => import("../../components/loading/index.vue"),
   errorComponent: () => import("../../components/error/index.vue"),
-  delay: 2000,
-  timeout: 5000,
+  delay: 5000,
+  timeout: 10000,
 });
 
 let sdk = ref(null);
