@@ -7,7 +7,7 @@
                     <div class="form-head">
                         <h4 class="title">用户登录</h4>
                         <el-form :model="formData" :rules="rules" ref="formDataRef">
-                            <el-form-item prop="username" class="form-group">
+                            <el-form-item prop="user_name" class="form-group">
                                 <el-input placeholder="请输入账号" v-model="formData.user_name" size="large" type="text">
                                     <template #prefix>
                                         <el-icon>
@@ -78,11 +78,13 @@ let formData = reactive({
 const rules = {
     user_name: [{
         required: true,
-        message: "请输入用户名"
+        message: "请输入用户名",
+        trigger: "blur"
     }],
     password: [{
         required: true,
-        message: "请输入密码"
+        message: "请输入密码",
+        trigger: "blur"
     }],
 }
 
@@ -95,6 +97,11 @@ const loginFunc = async (formEl) => {
 
             try {
                 const { data } = await login(form_obj)
+                if (data.code !== 200) {
+                    ElMessage.error(data.message)
+                    return
+                }
+
                 const { token, id, ...result } = data.result
                 ElMessage({
                     message: data.message,

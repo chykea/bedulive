@@ -12,6 +12,8 @@
                 <span style="vertical-align: middle">当前老师:{{ roomInfo.user && roomInfo.user.nick_name }}</span>
                 <el-button v-if="identity !== '1' && roomId == userInfo.uid" plain style="margin-left: 10px"
                   class="custom-el-btn-color" @click="updateRoomInfo">{{ isUpdate ? "确认" : "修改标题" }}</el-button>
+                <el-button plain style="margin-left: 10px" class="custom-el-btn-color" @click="handleSubscribe">{{
+                  subScribe ? "取消订阅" : "订阅" }}</el-button>
                 <p><span>当前在线人数:</span>{{ currentUser }}</p>
               </div>
             </div>
@@ -76,7 +78,7 @@
 import MessageBubble from "../../components/messagebubble/index.vue";
 import { onMounted, ref, watch, defineAsyncComponent } from "vue";
 import { useRoute } from "vue-router";
-import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom } from "../../request";
+import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom, getIsSubscribe, quitSubscribe, subscribeLiveRoom } from "../../request";
 import { getInfo, debounce } from "../../utils/util";
 import { getSocket } from "../../utils/socket";
 const client = getSocket();
@@ -100,13 +102,17 @@ const DrawBroad = defineAsyncComponent({
 });
 
 let sdk = ref(null);
+// 聊天信息
 const msg = ref("");
+// 代码编辑器的代码
 const code = ref("");
+// 是否只读(教师控制学生端编辑)
 let isReadOnly = ref(false);
 
 let roomId = route.query.roomId || userInfo.uid;
 const messageBox = ref([]);
 let roomInfo = ref({});
+let subScribe = ref(false);
 
 const showEditor = ref(false);
 const showDrawBroad = ref(false);
@@ -137,26 +143,24 @@ const languageOptions = [
 ];
 const showVideoMark = ref(false);
 onMounted(async () => {
-  const { data } = await getLiveRoom(roomId);
-  roomInfo.value = data.res;
+  // 获取直播间信息
+  roomInfo.value = await handleGetLiveRoom();
+  // 获取是否订阅
+  subScribe.value = await hanldeGetIsSubscribe();
+  // 创建socket连接
   // 不是主播就进行拉流
   if (roomId !== userInfo.uid) {
     showVideoMark.value = false;
     if (sdk.value) {
       sdk.value.close();
     }
-
     sdk.value = new SrsRtcPlayerAsync();
-
     const { data: { result } } = await getPlayerURL(roomId);
     sdk.value.play(result.stream_url).then(() => {
       document.getElementById("screen").srcObject = sdk.value.screen;
     }).catch((err) => {
-      console.log(1);
       showVideoMark.value = true;
-
     })
-
   }
   client.join({
     user: userInfo,
@@ -174,7 +178,68 @@ onMounted(async () => {
   });
 });
 
-// 刷新
+const hanldeGetIsSubscribe = async () => {
+  const { data } = await getIsSubscribe({ lid: roomInfo.value.id })
+  return data.res
+}
+const handleGetLiveRoom = async () => {
+  const { data } = await getLiveRoom(roomId);
+  return data.res;
+}
+const handleQuitSubscribe = async () => {
+  const { data } = await quitSubscribe({ lid: roomInfo.value.id })
+  return data
+}
+const handleSubscribeLiveRoom = async () => {
+  const { data } = await subscribeLiveRoom({ lid: roomInfo.value.id })
+  return data
+}
+const handleSubscribe = async () => {
+  if (userInfo.uid === roomId) {
+    ElMessage.error("不能订阅自己的直播间")
+    return
+  }
+  // 订阅直播间
+  if (subScribe.value) {
+    ElMessageBox.confirm(
+      '真的要取消订阅吗？',
+      '警告',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+      .then(async () => {
+        const data = await handleQuitSubscribe()
+        if (data.code === '0') {
+          ElMessage({
+            message: '取消成功',
+            type: 'success',
+            duration: 1000,
+            onClose: async () => {
+              subScribe.value = await hanldeGetIsSubscribe()
+            }
+          })
+        }
+      })
+      .catch(() => {
+      })
+  } else {
+    const data = await handleSubscribeLiveRoom()
+    if (data.code === '0') {
+      ElMessage({
+        message: '订阅成功',
+        type: 'success',
+        duration: 1000,
+      })
+      subScribe.value = data.res
+    }
+  }
+  // const { data } = await setLiveInfo({ uid: userInfo.uid, lid: roomInfo.value.id });
+}
+
+// 刷新直播
 const reload = async () => {
   if (sdk.value) {
     showVideoMark.value = false;

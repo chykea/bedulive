@@ -1,5 +1,4 @@
 import http from '../../utils/request'
-import qs from 'qs'
 const prefix = '/users'
 // 登录
 function login(params) {
@@ -17,12 +16,27 @@ function changePassword(params) {
 function changeInfo(params) {
     return http.post(prefix + '/changeInfo', params)
 }
-
+// 管理员
+function getUserList(params) {
+    return http.get(prefix + '/list?page=' + params.page)
+}
+function banUser(params) {
+    return http.get(prefix + '/ban?id=' + params.id)
+}
+function unbanUser(params) {
+    return http.get(prefix + '/unbanUser?id=' + params.id)
+}
+function updateUser(params) {
+    return http.post(prefix + '/update', params)
+}
 
 export {
     login,
     register,
     changePassword,
     changeInfo,
-
+    getUserList,
+    banUser,
+    unbanUser,
+    updateUser
 }

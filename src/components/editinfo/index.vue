@@ -211,7 +211,7 @@ const changeUserInfo = (formEle) => {
 
 }
 
-const avatarUrl = ref('')
+const avatarUrl = ref(store.userInfo.avatar_url)
 
 const beforeAvatarUpload = () => {
 

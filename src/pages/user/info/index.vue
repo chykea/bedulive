@@ -15,13 +15,22 @@
                         </div>
                         <div class="dashboard-menu">
                             <ul>
-                                <li v-for="i in key" :key="i.value">
-                                    <a :class="{ active: current == i.value }" href="javascript:void(0)"
-                                        @click="current = i.value">
-                                        <i class="lni lni-pencil-alt">
-                                        </i>{{ i.label }}
-                                    </a>
-                                </li>
+                                <template v-for="i in key" :key="i.value">
+                                    <li v-if="i.value == 'user' && user.identity == '0'">
+                                        <a :class="{ active: current == i.value }" href="javascript:void(0)"
+                                            @click="current = i.value">
+                                            <i class="lni lni-pencil-alt">
+                                            </i>{{ i.label }}
+                                        </a>
+                                    </li>
+                                    <li v-else-if="i.value !== 'user'">
+                                        <a :class="{ active: current == i.value }" href="javascript:void(0)"
+                                            @click="current = i.value">
+                                            <i class="lni lni-pencil-alt">
+                                            </i>{{ i.label }}
+                                        </a>
+                                    </li>
+                                </template>
                             </ul>
                             <div class="button">
                                 <a class="btn" href="javascript:void(0)" @click="logout">退出登录</a>
@@ -49,8 +58,11 @@
 </route>
 
 <script setup>
+import UserEdit from '../../../components/useredit/index.vue'
 import EditInfo from '../../../components/editinfo/index.vue'
 import Article from '../../../components/articleitem/index.vue'
+import Subscribe from '../../../components/subscribeitem/index.vue'
+
 import { ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
@@ -60,11 +72,16 @@ const store = useRootStore()
 const user = ref(store.userInfo)
 const current = ref('editinfo')
 const key = ref([
+    { label: '用户管理', value: 'user' },
     { label: '编辑个人资料', value: 'editinfo' },
-    { label: '文章管理', value: 'article' }])
+    { label: '文章管理', value: 'article' },
+    { label: '订阅管理', value: 'subscribe' }
+])
 const map = new Map([
     ['editinfo', EditInfo],
-    ['article', Article]
+    ['article', Article],
+    ['subscribe', Subscribe],
+    ['user', UserEdit]
 ])
 
 watchEffect(() => {
