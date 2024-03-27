@@ -3,7 +3,7 @@
         <router-link :to="`/live?roomId=` + teacher.uid" style="width: 100%;">
             <div class="single-item-grid">
                 <div class="image">
-                    <el-avatar :size="100">{{ teacher.user.nick_name }}</el-avatar>
+                    <el-avatar :size="100" :src='teacher.user.avatar_url'>{{ teacher.user.nick_name }}</el-avatar>
                 </div>
                 <div class="content">
                     <a href="javascript:void(0)" class="tag">{{ teacher.user.nick_name }}</a><br />

@@ -5,7 +5,7 @@
                 <div class="col-lg-8 col-md-7 col-12">
                     <div class="row">
                         <template v-if="articleList.length">
-                            <Articlecard v-for="a in articleList" :key="a.id" :article="a" />
+                            <Articlecard v-for="a in articleList" :key="a.id" @reload="getArticleList" :article="a" />
                         </template>
 
                         <template v-else>
@@ -70,6 +70,8 @@ import Articlecard from '../../../components/articlecard/index.vue'
 import { getAllArticle, searchArticle } from '../../../request/index'
 import { ref } from 'vue'
 import { debounce } from '../../../utils/util';
+import { useRootStore } from '../../../store/index'
+const store = useRootStore()
 const articleList = ref([])
 const page = ref(1)
 const total = ref(0)
@@ -77,6 +79,9 @@ const total = ref(0)
 const getArticleList = async () => {
     const { data } = await getAllArticle(page.value)
     articleList.value = data.res.articles
+    if (store.userInfo.identity !== '0') {
+        articleList.value = articleList.value.filter(a => a.state !== 1)
+    }
     total.value = data.res.total
 }
 // 获取文章列表
@@ -117,6 +122,8 @@ const search = debounce(async () => {
     articleList.value = data.res.articles
     total.value = data.res.total
 })
+
+
 
 </script>
 

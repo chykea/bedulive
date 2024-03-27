@@ -40,8 +40,16 @@ function deleteComment(params) {
     return http.get(prefix + '/delete?' + "commentId=" + params)
 }
 
+function lock(params) {
+    return http.get(prefix + '/lock?id=' + params.id)
+}
+function unlock(params) {
+    return http.get(prefix + '/unlock?id=' + params.id)
+}
+
 export {
     getAllArticle, getArticle, getUserArticle,
     deleteArticle, updateArticle, publishArticle, // 文章相关
-    addComment, deleteComment, searchArticle// 
+    addComment, deleteComment, searchArticle,// 
+    lock, unlock
 }
