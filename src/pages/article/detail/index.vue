@@ -39,7 +39,7 @@
                             <div class="post-comments">
                                 <h3 class="comment-title"><span>{{ commentsRef.length }}条评论</span></h3>
                                 <ul class="comments-list">
-                                    <Comment :comments="commentsRef" />
+                                    <Comment @reload="handleReload" :comments="commentsRef" />
                                 </ul>
                             </div>
                             <!-- 发布评论 -->
@@ -75,6 +75,12 @@
                             <div>
                                 <a href="javascript:void(0)">@{{ article.user && article.user.user_name }}</a>
                             </div>
+                            <div>
+                                <a href="javascript:void(0)" class="btn btn-primary" v-if="!isSubscribe"
+                                    @click="handleSubscribe(article.user.uid)">关注</a>
+                                <a href="javascript:void(0)" class="btn btn-primary" v-else
+                                    @click="handleCancelSubscribe(article.user.uid)">取消关注</a>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -93,28 +99,45 @@
 </route>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router'
-import { getArticle, addComment } from '../../../request/index'
+import { getArticle, addComment, getUserIsSubscribe, subscribeUser, cancelSubscribeUser } from '../../../request/index';
 import { ElMessage } from 'element-plus';
 import { debounce } from '../../../utils/util';
+
 import Comment from '../../../components/comments/index.vue'
 const route = useRoute()
 const id = route.query.articleId;
 const article = ref({})
 const commentsRef = ref([])
+const isSubscribe = ref(false)
+const getIsSubscribe = async (uid) => {
+    const { data } = await getUserIsSubscribe({ sub_uid: uid })
+    isSubscribe.value = data.res
+}
 
 const getArticleDetail = async () => {
     const { data } = await getArticle(id)
     const { comments, ...res } = data.res
     article.value = res
     commentsRef.value = comments
+    // 数据刷新后会导致回复列表关闭
     // 用于控制评论的展开与收起
     commentsRef.value.forEach(item => {
         item['expanded'] = false
     })
 }
-getArticleDetail()
+
+const handleReload = async () => {
+    await getArticleDetail()
+}
+onMounted(async () => {
+    await getArticleDetail()
+    await getIsSubscribe(article.value.user.uid)
+})
+
+
+
 const contentRef = ref('')
 const publishComment = debounce(async () => {
     if (!contentRef.value.trim()) return
@@ -127,8 +150,8 @@ const publishComment = debounce(async () => {
             type: 'success',
             duration: 1000,
             onClose: () => {
-                // 发布后刷新页面
-                location.reload()
+                // 发布后重新获取评论
+                getArticleDetail()
             }
         })
     }
@@ -148,7 +171,20 @@ const download = (url, fileName) => {//跨域文件路径、下载到本地的�
     x.send();
 }
 
-
+const handleSubscribe = async (uid) => {
+    const { data } = await subscribeUser({ sub_uid: uid })
+    if (data.code == '0') {
+        ElMessage.success('关注成功')
+        isSubscribe.value = true
+    }
+}
+const handleCancelSubscribe = async (uid) => {
+    const { data } = await cancelSubscribeUser({ sub_uid: uid })
+    if (data.code == '0') {
+        ElMessage.success('取消关注成功')
+        isSubscribe.value = false
+    }
+}
 </script>
 
 <style lang='scss' scoped>

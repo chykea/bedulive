@@ -43,7 +43,7 @@ import Reply from "./reply.vue";
 import { addComment, deleteComment } from "../../../request/index";
 import { useRootStore } from "../../../store/index";
 const store = useRootStore();
-console.log(store.userInfo.uid);
+const emits = defineEmits(["reloads"]);
 const props = defineProps({
   parentReply: {
     type: Object,
@@ -101,7 +101,8 @@ const handleReply = async () => {
     locationID.value = "body";
     id = null;
     replyContent.value = "";
-    location.reload();
+    emits('reloads')
+    // location.reload();
     return;
   }
   ElMessage({
@@ -126,7 +127,8 @@ const deleteReply = async (commentId) => {
           type: "success",
           duration: 1000,
         });
-        location.reload();
+        emits('reloads')
+        // location.reload();
         return;
       }
       ElMessage({

@@ -18,12 +18,12 @@
     </div>
     <div v-if="comment.replies.length" style="margin-top: 15px">
       <span>共有{{ comment.replies.length }}条回复</span>&nbsp;
-      <a href="javascript:void(0)" class="reply-link" @click="comment.expanded = true">查看回复</a>
+      <a href="javascript:void(0)" class="reply-link" @click="comment.expand = true">查看回复</a>
     </div>
     <div :id="prefix + comment.id"></div>
     <template v-if="comment.replies.length">
-      <el-dialog v-model="comment.expanded" draggable title="回复列表" width="800">
-        <Reply v-for="reply in comment.replies" :reply="reply" :articleId="articleId" />
+      <el-dialog v-model="comment.expand" draggable title="回复列表" width="800">
+        <Reply @reloads="handleReload" v-for="reply in comment.replies" :reply="reply" :articleId="articleId" />
       </el-dialog>
     </template>
   </li>
@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 import Reply from "./components/reply.vue";
@@ -52,6 +52,8 @@ const props = defineProps({
     default: () => [],
   },
 });
+
+const emits = defineEmits(["reload"]);
 const { articleId } = route.query;
 const locationID = ref("body");
 const prefix = "reply-";
@@ -95,7 +97,8 @@ const handleReply = async () => {
     locationID.value = "body";
     id = null;
     replyContent.value = "";
-    location.reload();
+    emits('reload')
+
     return;
   }
   ElMessage({
@@ -120,7 +123,7 @@ const deleteReply = async (commentId) => {
           type: "success",
           duration: 1000,
         });
-        location.reload();
+        emits('reload')
         return;
       }
       ElMessage({
@@ -136,6 +139,13 @@ const deleteReply = async (commentId) => {
     });
   }
 };
+// 
+const handleReload = () => {
+  console.log('评论回复');
+  emits('reload')
+}
+
+
 </script>
 
 <style lang="scss" scoped>
