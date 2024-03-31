@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 import Reply from "./components/reply.vue";
@@ -52,6 +52,7 @@ const props = defineProps({
     default: () => [],
   },
 });
+
 
 const emits = defineEmits(["reload"]);
 const { articleId } = route.query;

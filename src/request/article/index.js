@@ -40,6 +40,10 @@ function deleteComment(params) {
     return http.get(prefix + '/delete?' + "commentId=" + params)
 }
 
+
+
+
+// 管理员
 function lock(params) {
     return http.get(prefix + '/lock?id=' + params.id)
 }
@@ -51,5 +55,5 @@ export {
     getAllArticle, getArticle, getUserArticle,
     deleteArticle, updateArticle, publishArticle, // 文章相关
     addComment, deleteComment, searchArticle,// 
-    lock, unlock
+    lock, unlock,
 }

@@ -4,17 +4,14 @@
             <div class="row">
                 <div class="col-lg-8 col-md-12 col-12">
                     <div class="single-inner">
-                        <!-- 封面 -->
                         <div class="post-thumbnils" v-if="article.cover_url">
                             <img :src="article.cover_url" alt="#">
                         </div>
                         <div class="post-details">
                             <div class="detail-inner">
-                                <!-- 标题 -->
                                 <h2 class="post-title">
                                     {{ article.title }}
                                 </h2>
-                                <!-- post meta -->
                                 <ul class="custom-flex post-meta">
                                     <!-- 发布时间 -->
                                     <li>
@@ -23,7 +20,6 @@
                                             {{ article.createdAt }}
                                         </a>
                                     </li>
-
                                 </ul>
                                 <div v-if="article.file_url">
                                     <span class="des">文章附件：</span>&nbsp;
@@ -75,11 +71,19 @@
                             <div>
                                 <a href="javascript:void(0)">@{{ article.user && article.user.user_name }}</a>
                             </div>
-                            <div>
+                            <div v-if="article.user && userInfo.uid != article.user.uid">
                                 <a href="javascript:void(0)" class="btn btn-primary" v-if="!isSubscribe"
                                     @click="handleSubscribe(article.user.uid)">关注</a>
                                 <a href="javascript:void(0)" class="btn btn-primary" v-else
                                     @click="handleCancelSubscribe(article.user.uid)">取消关注</a>
+                            </div>
+                            <div style="margin-top: 20px;">
+                                <el-icon :size="50" style="cursor: pointer;"
+                                    :style="[isCollectArticle ? 'color: #ff6700;' : '']"
+                                    :title="isCollectArticle ? '取消收藏' : '收藏'"
+                                    @click="isCollectArticle ? handleRemoveCollectArticle(article.id) : handleCollectArticle(article.id)">
+                                    <Star />
+                                </el-icon>
                             </div>
                         </div>
                     </div>
@@ -101,16 +105,21 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router'
+import { useRootStore } from '../../../store';
 import { getArticle, addComment, getUserIsSubscribe, subscribeUser, cancelSubscribeUser } from '../../../request/index';
+import { collectArticle, removeCollectArticle, isCollect } from '../../../request/collect/index'
 import { ElMessage } from 'element-plus';
 import { debounce } from '../../../utils/util';
-
 import Comment from '../../../components/comments/index.vue'
 const route = useRoute()
+const store = useRootStore()
+const userInfo = store.userInfo
+
 const id = route.query.articleId;
 const article = ref({})
 const commentsRef = ref([])
 const isSubscribe = ref(false)
+const lock = ref(false)
 const getIsSubscribe = async (uid) => {
     const { data } = await getUserIsSubscribe({ sub_uid: uid })
     isSubscribe.value = data.res
@@ -128,18 +137,29 @@ const getArticleDetail = async () => {
     })
 }
 
+const isCollectArticle = ref(false)
+const getIsCollect = async (aid) => {
+    const { data } = await isCollect({ aid })
+    if (data.code = '0') {
+        isCollectArticle.value = data.res
+    }
+}
+
 const handleReload = async () => {
     await getArticleDetail()
 }
 onMounted(async () => {
     await getArticleDetail()
     await getIsSubscribe(article.value.user.uid)
+    await getIsCollect(id)
 })
 
 
 
 const contentRef = ref('')
-const publishComment = debounce(async () => {
+const publishComment = async () => {
+    if (lock.value) return
+    lock.value = true
     if (!contentRef.value.trim()) return
     const parentId = null, content = contentRef.value, articleId = id;
     const { data } = await addComment({ parentId, content, articleId })
@@ -148,14 +168,15 @@ const publishComment = debounce(async () => {
         ElMessage({
             message: data.message,
             type: 'success',
-            duration: 1000,
+            duration: 1500,
             onClose: () => {
                 // 发布后重新获取评论
                 getArticleDetail()
+                lock.value = false
             }
         })
     }
-})
+}
 
 const download = (url, fileName) => {//跨域文件路径、下载到本地的文件名
     var x = new XMLHttpRequest();
@@ -170,19 +191,71 @@ const download = (url, fileName) => {//跨域文件路径、下载到本地的�
     }
     x.send();
 }
-
 const handleSubscribe = async (uid) => {
+    if (lock.value) return
+    lock.value = true
     const { data } = await subscribeUser({ sub_uid: uid })
     if (data.code == '0') {
-        ElMessage.success('关注成功')
+        ElMessage({
+            message: '关注成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+                lock.value = false
+            }
+        })
         isSubscribe.value = true
     }
 }
 const handleCancelSubscribe = async (uid) => {
+    if (lock.value) return
+    lock.value = true
     const { data } = await cancelSubscribeUser({ sub_uid: uid })
     if (data.code == '0') {
-        ElMessage.success('取消关注成功')
+        ElMessage({
+            message: '取消关注成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+                lock.value = false
+            }
+        })
         isSubscribe.value = false
+    }
+}
+const handleRemoveCollectArticle = async (aid) => {
+    if (lock.value) return
+    lock.value = true
+    const { data } = await removeCollectArticle({ aid })
+    if (data.code == '0') {
+        ElMessage({
+            message: '取消收藏成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+                lock.value = false
+            }
+        })
+        isCollectArticle.value = false
+
+    }
+
+}
+
+const handleCollectArticle = async (aid) => {
+    if (lock.value) return
+    lock.value = true
+    const { data } = await collectArticle({ aid })
+    if (data.code == '0') {
+        ElMessage({
+            message: '收藏成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+                lock.value = false
+            }
+        })
+        isCollectArticle.value = true
     }
 }
 </script>
