@@ -12,7 +12,7 @@ function isCollect(params) {
     return http.get(prefix + '/getCollection?aid= ' + params.aid)
 }
 function getAllCollect(params) {
-    return http.get(prefix + '/getAllCollection?page=' + params.page)
+    return http.get(prefix + '/getCollections?page=' + params.page)
 }
 
 export {

@@ -63,6 +63,7 @@ import EditInfo from '../../../components/editinfo/index.vue'
 import Article from '../../../components/articleitem/index.vue'
 import Subscribe from '../../../components/subscribeitem/index.vue'
 import Follow from '../../../components/follow/index.vue'
+import Collect from '../../../components/collect/index.vue'
 
 import { ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router';
@@ -77,14 +78,16 @@ const key = ref([
     { label: '编辑个人资料', value: 'editinfo' },
     { label: '文章管理', value: 'article' },
     { label: '订阅管理', value: 'subscribe' },
-    { label: '我的关注', value: 'follow' }
+    { label: '我的关注', value: 'follow' },
+    { label: '我的收藏', value: 'collect' },
 ])
 const map = new Map([
     ['editinfo', EditInfo],
     ['article', Article],
     ['subscribe', Subscribe],
     ['user', UserEdit],
-    ['follow', Follow]
+    ['follow', Follow],
+    ['collect', Collect]
 ])
 
 watchEffect(() => {
