@@ -76,9 +76,10 @@
 
 <script setup>
 import MessageBubble from "../../components/messagebubble/index.vue";
-import { onMounted, ref, watch, defineAsyncComponent } from "vue";
+import { onMounted, ref, watch, defineAsyncComponent, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom, getIsSubscribe, quitSubscribe, subscribeLiveRoom } from "../../request";
+import flvjs from 'flv.js'
 import { getInfo, debounce } from "../../utils/util";
 import { getSocket } from "../../utils/socket";
 const client = getSocket();
@@ -150,18 +151,36 @@ onMounted(async () => {
   // 创建socket连接
   // 不是主播就进行拉流
   if (roomId !== userInfo.uid) {
+
+    /* if (flvjs.isSupported()) {
+      // 能播放,但是很卡
+      showVideoMark.value = false;
+      const flvPlayer = flvjs.createPlayer({
+        type: "flv",
+        url: `https://192.168.106.130/bedulive/${roomId}.flv`,
+      })
+      flvPlayer.attachMediaElement(document.getElementById("screen"));
+      flvPlayer.load();
+      flvPlayer.play();
+    } */
+
+
     showVideoMark.value = false;
     if (sdk.value) {
       sdk.value.close();
     }
     sdk.value = new SrsRtcPlayerAsync();
-    const { data: { result } } = await getPlayerURL(roomId);
-    sdk.value.play(result.stream_url).then(() => {
+    const streamURL = import.meta.env.VITE_STREAM_URL + `/${roomId}`
+    try {
+      await sdk.value.play(streamURL)
       document.getElementById("screen").srcObject = sdk.value.screen;
-    }).catch((err) => {
+    } catch (e) {
       showVideoMark.value = true;
-    })
+      sdk.value.close();
+    }
   }
+
+  // 直播间的聊天与多人协同功能
   client.join({
     user: userInfo,
     roomId: roomId,
@@ -178,18 +197,22 @@ onMounted(async () => {
   });
 });
 
+// 是否订阅
 const hanldeGetIsSubscribe = async () => {
   const { data } = await getIsSubscribe({ lid: roomInfo.value.id })
   return data.res
 }
+// 获取直播间信息
 const handleGetLiveRoom = async () => {
   const { data } = await getLiveRoom(roomId);
   return data.res;
 }
+// 取消订阅
 const handleQuitSubscribe = async () => {
   const { data } = await quitSubscribe({ lid: roomInfo.value.id })
   return data
 }
+// 订阅
 const handleSubscribeLiveRoom = async () => {
   const { data } = await subscribeLiveRoom({ lid: roomInfo.value.id })
   return data
@@ -260,13 +283,13 @@ const startLive = async () => {
   }
 
   sdk.value = new SrsRtcPublishAsync();
-  const { data: { result } } = await getPushURL();
-  console.log(result);
+  const streamURL = import.meta.env.VITE_STREAM_URL + `/${roomId}`
   try {
-    let session = await sdk.value.publish(result.stream_url);
+    await sdk.value.publish(streamURL);
     document.getElementById("screen").srcObject = sdk.value.screen;
   } catch (e) {
     sdk.value.close();
+    isLive.value = false;
   }
 };
 
@@ -274,6 +297,9 @@ const closeLive = async () => {
   isLive.value = false;
   if (sdk.value.pc) {
     sdk.value.close();
+    const tracks = document.getElementById("screen").srcObject.getTracks();
+    console.log(tracks);
+    tracks.forEach((track) => track.stop());
     document.getElementById("screen").srcObject = null;
   }
 };
@@ -363,6 +389,9 @@ window.onunload = () => {
   client.leave(roomId);
   window.onunload = null;
 };
+onBeforeUnmount(() => {
+  client.leave(roomId);
+})
 </script>
 
 <style lang="scss" scoped>

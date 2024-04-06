@@ -30,6 +30,7 @@ function SrsRtcPublishAsync() {
 
     self.close = function () {
         self.pc && self.pc.close();
+
         self.pc = null;
     };
 

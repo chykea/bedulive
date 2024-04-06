@@ -11,8 +11,12 @@ src/pages/
 ```
 
 2. 流媒体服务启动
-- 本项目所使用的流媒体服务为srs中的rtc, 所以在启动前需要开启rtc-to-rtmp(在rtc-to-rtmp.conf进行配置)
-- 启动命令: `./objs/srs -c conf/rtc.conf`
+- 本项目所使用的流媒体服务为srs中的rtc, 所以在启动前需要开启rtc-to-rtmp(srs.conf把rtc-to-rtmp打开)
+- 启动前先进入`./srs/trunk/` 目录
+- 启动命令: `./objs/srs -c conf/srs.conf` 
+- 停止命令: `./etc/init.d/srs stop`
+- 重启命令: `./etc/init.d/srs restart`
+
 - http服务接口在 `/root/srs/trunk/src/app` 目录下, 对应文件的前缀为 srs-app-rtc
 > srs-app-rtc-server 为开启http服务文件
 > srs-app-rtc-conn 为处理与客户端建立连接的文件
