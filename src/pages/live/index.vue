@@ -32,7 +32,7 @@
               <el-button class="custom-el-btn-color" :disabled="!isLive"
                 v-if="identity !== '1' && roomId == userInfo.uid" plain @click="closeLive">关闭直播</el-button>
               <el-button class="custom-el-btn-color" plain @click="showEditor = true">代码编辑器</el-button>
-              <el-button class="custom-el-btn-color" plain @click="openDrawBroad">画板</el-button>
+              <el-button class="custom-el-btn-color" plain @click="showDrawBroad = true">画板</el-button>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@
       style="width: 240px" @change="changeEditorLanguage">
       <el-option v-for="item in languageOptions" :key="item.value" :label="item.label" :value="item.value" />
     </el-select>
-    <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="openShare">{{ !isShare ? "开启" : "关闭"
+    <el-button class="custom-el-btn-color" v-if="identity !== '1'" @click="handleShare">{{ readOnly ? "开启" : "关闭"
       }}共享编辑</el-button>
     <div class="editor-box">
       <Editor ref="editor" :isReadOnly="isReadOnly" :code="code" />
@@ -82,7 +82,7 @@ import { getPushURL, getPlayerURL, setLiveInfo, getLiveRoom, getIsSubscribe, qui
 import flvjs from 'flv.js'
 import { getInfo, debounce } from "../../utils/util";
 import { getSocket } from "../../utils/socket";
-const client = getSocket();
+const client = getSocket(import.meta.env.VITE_SOCKET_URL + '/live');
 const route = useRoute();
 const userInfo = getInfo();
 const identity = userInfo?.identity || "1";
@@ -149,6 +149,8 @@ onMounted(async () => {
   // 获取是否订阅
   subScribe.value = await hanldeGetIsSubscribe();
   // 创建socket连接
+  client.connect()
+  client.socket.emit('joinLive', { roomId, user: userInfo });
   // 不是主播就进行拉流
   if (roomId !== userInfo.uid) {
 
@@ -179,22 +181,6 @@ onMounted(async () => {
       sdk.value.close();
     }
   }
-
-  // 直播间的聊天与多人协同功能
-  client.join({
-    user: userInfo,
-    roomId: roomId,
-  });
-  client.socket.on("getMsg", (data) => {
-    messageBox.value.push({ msg: data.msg, user: data.user });
-  });
-  // 收到代码
-  client.socket.on("getCode", (data) => {
-    code.value = data.code; // 用于保存学生端打开初始化的值
-  });
-  client.socket.on("share", (data) => {
-    isReadOnly.value = data.readOnly;
-  });
 });
 
 // 是否订阅
@@ -207,16 +193,17 @@ const handleGetLiveRoom = async () => {
   const { data } = await getLiveRoom(roomId);
   return data.res;
 }
-// 取消订阅
+// 处理取消订阅
 const handleQuitSubscribe = async () => {
   const { data } = await quitSubscribe({ lid: roomInfo.value.id })
   return data
 }
-// 订阅
+// 处理订阅
 const handleSubscribeLiveRoom = async () => {
   const { data } = await subscribeLiveRoom({ lid: roomInfo.value.id })
   return data
 }
+// 订阅与取消订阅操作
 const handleSubscribe = async () => {
   if (userInfo.uid === roomId) {
     ElMessage.error("不能订阅自己的直播间")
@@ -259,15 +246,14 @@ const handleSubscribe = async () => {
       subScribe.value = data.res
     }
   }
-  // const { data } = await setLiveInfo({ uid: userInfo.uid, lid: roomInfo.value.id });
 }
 
 // 刷新直播
 const reload = async () => {
   if (sdk.value) {
     showVideoMark.value = false;
-    const { data: { result } } = await getPlayerURL(roomId);
-    sdk.value.play(result.stream_url).then(() => {
+    const streamURL = import.meta.env.VITE_STREAM_URL + `/${roomId}`
+    sdk.value.play(streamURL).then(() => {
       document.getElementById("screen").srcObject = sdk.value.screen;
     }).catch((err) => {
       showVideoMark.value = true
@@ -298,19 +284,27 @@ const closeLive = async () => {
   if (sdk.value.pc) {
     sdk.value.close();
     const tracks = document.getElementById("screen").srcObject.getTracks();
-    console.log(tracks);
     tracks.forEach((track) => track.stop());
     document.getElementById("screen").srcObject = null;
   }
 };
 
+// 直播间的聊天与多人协同功能
+client.socket.on("getMsg", (data) => {
+  messageBox.value.push({ ...data, isOwn: false });
+})
+// 收到代码
+client.socket.on("getCode", ({ code: c }) => {
+  code.value = c;
+});
+client.socket.on("share", ({ readOnly }) => {
+  isReadOnly.value = readOnly
+});
+
 const sendMessage = () => {
-  client.sendMsg({ roomId, msg: msg.value, user: userInfo }).then((res) => {
-    if (res.code === "200") {
-      messageBox.value.push({ msg: msg.value, user: userInfo, isOwn: true });
-      msg.value = "";
-    }
-  });
+  client.socket.emit('sendMsg', ({ roomId, msg: msg.value, user: userInfo }))
+  messageBox.value.push({ msg: msg.value, user: userInfo, isOwn: true });
+  msg.value = "";
 };
 // 消息超过50条时，删除最旧一条
 watch(
@@ -327,16 +321,11 @@ const changeEditorLanguage = (e) => {
 };
 
 // 开启/关闭共享编辑
-const isShare = ref(false);
-const openShare = () => {
-  isShare.value = !isShare.value;
-  client.openShare({ roomId, user: userInfo, isShare: isShare.value });
+const readOnly = ref(true);
+const handleShare = () => {
+  readOnly.value = !readOnly.value;
+  client.socket.emit('openShare', { roomId, readOnly: readOnly.value })
 };
-
-const openDrawBroad = () => {
-  showDrawBroad.value = true;
-};
-
 const initImage = ref("");
 client.socket.on("initImage", (data) => {
   if (!data) return;
@@ -365,20 +354,19 @@ const updateRoomInfo = async () => {
     isUpdate.value = !isUpdate.value;
   } else {
     const params = {
-      uid: userInfo.uid,
+      uid: roomInfo.value.uid,
       title: roomInfo.value.title,
     };
-    // console.log(params);
     const { data } = await setLiveInfo(params);
     if (data.code == "0") {
       isUpdate.value = !isUpdate.value;
       ElMessage.success("修改成功");
-      client.socket.emit("updateRoomInfo", { roomId, roomInfo: params });
+      client.socket.emit("updateRoomInfo", { roomId, roomInfo: { title: params.title } });
     }
   }
 };
-client.socket.on("updateRoom", (data) => {
-  roomInfo.value.title = data.title;
+client.socket.on("updateRoom", ({ title }) => {
+  roomInfo.value.title = title;
 });
 
 const currentUser = ref(0);
@@ -386,11 +374,13 @@ client.socket.on("currentUser", (data) => {
   currentUser.value = data;
 });
 window.onunload = () => {
-  client.leave(roomId);
+  client.socket.emit("leaveLive", { roomId, user: userInfo });
+  client.disconnect()
   window.onunload = null;
 };
 onBeforeUnmount(() => {
-  client.leave(roomId);
+  client.socket.emit("leaveLive", { roomId, user: userInfo });
+  client.disconnect()
 })
 </script>
 

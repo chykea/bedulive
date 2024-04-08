@@ -104,8 +104,7 @@ const editorInit = () => {
         editor.onDidChangeModelContent(debounce((val) => {
             if (!editorLock) { // 为true时不执行
                 if (!isReadOnly.value) {
-                    console.log(editor.getValue());
-                    client.sendCode({ roomId, code: editor.getValue(), user: userInfo }).then(res => { })
+                    client.socket.emit('sendCode', { roomId, code: editor.getValue() })
                 }
             }
             editorLock = false

@@ -86,14 +86,13 @@ const send = (arr) => {
     if (arr[0] == 'gatherImage') {
         client.socket.emit('sendPaint', {
             roomId,
-            user: userInfo,
-            data: drawbroadInstance.imgSrc
+            img: drawbroadInstance.imgSrc
         })
     }
 }
-client.socket.on('getPaint', ({ roomId, user, data }) => {
+client.socket.on('getPaint', ({ roomId, img }) => {
     nextTick(() => {
-        drawbroadInstance.drawImage(data)
+        drawbroadInstance.drawImage(img)
     })
 })
 onMounted(() => {

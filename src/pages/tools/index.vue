@@ -14,7 +14,7 @@
 
                             </div>
                         </nav>
-                        <div class="connect" v-if="JSON.stringify(userInfo) !== '{}'">
+                        <div class="connect" v-if="userInfo && JSON.stringify(userInfo) !== '{}'">
                             <el-button @click="shareCode" :disabled="roomStore.connect">创建房间</el-button>
                             <el-button @click="joinRoom" :disabled="roomStore.connect">加入房间</el-button>
                             <el-button @click="leaveRoom" :disabled="!roomStore.connect">离开房间</el-button>
@@ -50,7 +50,8 @@ const roomStore = useToolStore()
 const codeStore = useCodeStore()
 const canvaStore = useCanvaStore()
 const userInfo = ref({})
-const client = getSocket()
+const client = getSocket(import.meta.env.VITE_SOCKET_URL + '/tool')
+
 watchEffect(() => {
     userInfo.value = store.userInfo
 })

@@ -47,24 +47,26 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import * as monaco from 'monaco-editor';
-import { nextTick, ref, onBeforeUnmount, h } from 'vue'
+import { nextTick, ref, onBeforeUnmount, h, onMounted } from 'vue'
+import { Doc, applyUpdate, encodeStateAsUpdate } from 'yjs'
+import { MonacoBinding } from 'y-monaco'
 import { debounce } from '../../utils/util'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getSocket } from '../../utils/socket'
-import { useToolStore, useCodeStore } from '../../store'
+import { useToolStore, useCodeStore, useRootStore } from '../../store'
+// const userStore = useRootStore()
 const roomStore = useToolStore()
 const codeStore = useCodeStore()
 const emits = defineEmits(['update:modelValue'])
-
 const client = getSocket()
 const language = ref('javascript')
 const theme = ref('vs')
 const fontSize = ref(16)
 const code = ref('')
-
-
 const editorLock = ref(false)
 
+// const ydoc = new Doc()
+// const ytext = ydoc.getText('monaco')
 
 const languageOptions = [
     {
@@ -155,6 +157,20 @@ const editorInit = () => {
             overviewRulerBorder: false, // 不要滚动条的边框  
         }) :
             editor.setValue("");
+
+        /* ydoc.on('update', (update) => {
+            if (roomStore.connect) {
+                client.socket.emit('update:yjs', { roomId: roomStore.roomId, update })
+            }
+        })
+        client.socket.on('update', (update) => {
+            let yjsupdate = new Uint8Array(update)
+            applyUpdate(ydoc, yjsupdate)
+            yjsupdate = null
+        })
+        new MonacoBinding(ytext, editor.getModel(), new Set()) */
+
+        // 监听编辑器内容变化
         editor.onDidChangeModelContent(debounce((val) => {
             if (!(editorLock.value)) { // 没有锁就执行
                 // code.value 用于导入导出代码
@@ -164,10 +180,20 @@ const editorInit = () => {
                 }
             }
             editorLock.value = false
+            /* codeStore.code = code.value = editor.getValue()
+            if (roomStore.roomId === userStore.userInfo.uid && roomStore.connect) {
+                client.socket.emit('init:yjs', { roomId: roomStore.roomId, code: code.value })
+            } */
         }))
     })
 }
-editorInit()
+
+onMounted(() => {
+    editorInit()
+})
+
+
+
 const historyMap = new Map()
 const changeLanguage = (language) => {
     // 存储当前语言编辑的代码
@@ -273,6 +299,14 @@ const runCode = () => {
 }
 
 client.socket.on('runRes', (result) => {
+    if (!result.length) {
+        ElMessage({
+            message: '没有运行结果,需要打印结果时使用console.log进行输出',
+            type: 'success',
+            duration: 1000
+        })
+        return
+    }
     const vnode = h('div', generateResult(result))
     ElMessageBox.alert(vnode, '运行结果')
 });

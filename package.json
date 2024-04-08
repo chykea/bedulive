@@ -24,7 +24,10 @@
     "remixicon": "^4.2.0",
     "socket.io-client": "^4.7.4",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "y-monaco": "^0.1.5",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.14"
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^1.1.0",
